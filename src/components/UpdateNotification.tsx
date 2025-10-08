@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { open } from '@tauri-apps/plugin-shell';
 import './UpdateNotification.css';
 
 interface UpdateInfo {
@@ -47,9 +48,17 @@ export function UpdateNotification() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (updateInfo?.download_url) {
-      window.open(updateInfo.download_url, '_blank');
+      try {
+        // Use Tauri's shell plugin to open URL in default browser
+        await open(updateInfo.download_url);
+        console.log('✅ Opened download page:', updateInfo.download_url);
+      } catch (err) {
+        console.error('❌ Failed to open download page:', err);
+        // Fallback to window.open for browser/dev mode
+        window.open(updateInfo.download_url, '_blank');
+      }
     }
   };
 
