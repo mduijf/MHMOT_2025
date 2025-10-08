@@ -59,8 +59,17 @@ export function DrawingCanvas({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Als initialImage leeg is, reset de loadedImageRef (belangrijk voor undo!)
+    if (!initialImage || initialImage.length === 0) {
+      if (loadedImageRef.current !== '') {
+        console.log(`[DrawingCanvas] Clearing loaded image ref for question ${questionNumber}`);
+        loadedImageRef.current = '';
+      }
+      return;
+    }
+
     // Alleen laden als we niet aan het tekenen zijn EN de image is anders dan de laatst geladen
-    if (!isDrawing && initialImage && initialImage.length > 0 && initialImage !== loadedImageRef.current) {
+    if (!isDrawing && initialImage !== loadedImageRef.current) {
       console.log(`[DrawingCanvas] Loading initial image for question ${questionNumber}, length=${initialImage.length}`);
       hasDrawnRef.current = false; // Reset DIRECT - user heeft niet getekend
       const img = new Image();
