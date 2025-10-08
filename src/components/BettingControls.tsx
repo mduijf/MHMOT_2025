@@ -11,7 +11,6 @@ interface BettingControlsProps {
 }
 
 export function BettingControls({ 
-  playerId, 
   playerBalance, 
   minBet,
   onBet, 

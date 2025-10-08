@@ -86,7 +86,7 @@ export function AnswerInput({ gameState, playerId, onUpdateAnswer }: AnswerInput
           
           <div className="pot-item">
             <p className="pot-label">Pot</p>
-            <p className="pot-amount">€{gameState.pot}</p>
+            <p className="pot-amount">€{gameState.current_round?.pot || 0}</p>
           </div>
         </div>
       </div>

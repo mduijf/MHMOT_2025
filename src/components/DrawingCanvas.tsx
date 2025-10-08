@@ -24,8 +24,7 @@ export function DrawingCanvas({
 }: DrawingCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState(Date.now());
-  const syncTimeoutRef = useRef<NodeJS.Timeout>();
+  const syncTimeoutRef = useRef<number>();
   const rafRef = useRef<number>();
   const needsSyncRef = useRef(false);
   const lastPosRef = useRef<{x: number, y: number} | null>(null);
@@ -111,13 +110,14 @@ export function DrawingCanvas({
       const touch = e.touches[0];
       
       // Log touchType voor debugging
-      if (touch.touchType) {
-        console.log('[DrawingCanvas] Touch type:', touch.touchType);
+      const touchType = (touch as any).touchType;
+      if (touchType) {
+        console.log('[DrawingCanvas] Touch type:', touchType);
       }
       
       // Check touchType: "stylus" voor Apple Pencil, "direct" voor vinger
       // Als touchType undefined is (oudere browsers), accepteer alle touches
-      if (touch.touchType === 'direct') {
+      if (touchType === 'direct') {
         console.log('[DrawingCanvas] Ignoring finger touch');
         return; // Negeer alleen expliciete vinger touches
       }
@@ -172,7 +172,8 @@ export function DrawingCanvas({
       const touch = e.touches[0];
       
       // Check touchType: "stylus" voor Apple Pencil, "direct" voor vinger
-      if (touch.touchType === 'direct') {
+      const touchType = (touch as any).touchType;
+      if (touchType === 'direct') {
         return; // Negeer alleen expliciete vinger touches
       }
       
@@ -249,7 +250,6 @@ export function DrawingCanvas({
       const imageDataUrl = canvas.toDataURL('image/png');
       console.log(`[DrawingCanvas] saveCanvas called: playerId=${playerId}, questionNumber=${questionNumber}, imageData.length=${imageDataUrl.length}`);
       onSave(questionNumber, imageDataUrl);
-      setLastSyncTime(Date.now());
     } else if (!hasDrawnRef.current) {
       console.log(`[DrawingCanvas] User hasn't drawn yet, not saving: playerId=${playerId}, questionNumber=${questionNumber}`);
     } else {

@@ -38,8 +38,6 @@ export function GraphicsOutput({ gameState, mode, timer = 0 }: GraphicsOutputPro
       {/* Speler kaarten onderaan */}
       <div className="player-cards-container">
         {players.slice(0, 3).map((player, index) => {
-          const correctAnswers = player.answers.filter(a => a.is_correct === true).length;
-          
           return (
             <div key={player.id} className={`player-card card-${index + 1}`}>
               {/* Saldo bovenaan */}

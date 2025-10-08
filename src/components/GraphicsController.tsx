@@ -7,7 +7,7 @@ interface GraphicsControllerProps {
   gameState: GameState;
 }
 
-export function GraphicsController({ gameState }: GraphicsControllerProps) {
+export function GraphicsController({ }: GraphicsControllerProps) {
   const [timer, setTimer] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [viewMode, setViewMode] = useState<'fill' | 'key' | 'both'>('fill');
