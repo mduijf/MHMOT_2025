@@ -12,18 +12,21 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "Met het Mes op Tafel",
         "width": 1400,
         "height": 900,
         "minWidth": 1200,
         "minHeight": 800,
         "center": true,
-        "resizable": true
+        "resizable": true,
+        "url": "/"
       }
     ],
     "security": {
       "csp": null
-    }
+    },
+    "withGlobalTauri": true
   },
   "bundle": {
     "active": true,
