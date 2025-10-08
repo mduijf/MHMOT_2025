@@ -217,22 +217,30 @@ export function QuizmasterView({
     }
   };
 
-  const handleSchoon = () => {
-    // Start nieuwe ronde (schonen)
-    onStartNextRound();
-    
-    // Toon undo knop voor 15 seconden
-    setShowUndo(true);
-    
-    // Clear eventuele bestaande timer
-    if (undoTimerRef.current) {
-      clearTimeout(undoTimerRef.current);
+  const handleSchoon = async () => {
+    try {
+      // EERST: Sla huidige state op voor undo
+      await invoke('save_state_for_undo');
+      
+      // DAN: Start nieuwe ronde (schonen)
+      await onStartNextRound();
+      
+      // Toon undo knop voor 15 seconden
+      setShowUndo(true);
+      
+      // Clear eventuele bestaande timer
+      if (undoTimerRef.current) {
+        clearTimeout(undoTimerRef.current);
+      }
+      
+      // Verberg undo na 15 seconden
+      undoTimerRef.current = window.setTimeout(() => {
+        setShowUndo(false);
+      }, 15000);
+    } catch (err) {
+      console.error('Schoon failed:', err);
+      alert('Kon schermen niet wissen');
     }
-    
-    // Verberg undo na 15 seconden
-    undoTimerRef.current = window.setTimeout(() => {
-      setShowUndo(false);
-    }, 15000);
   };
 
   const handleUndo = async () => {

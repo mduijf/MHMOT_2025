@@ -236,23 +236,24 @@ pub fn complete_round(state: State<AppState>, winner_id: Option<String>) -> Resu
 }
 
 #[tauri::command]
-pub fn start_next_round(state: State<AppState>) -> Result<GameState, String> {
-    // Bewaar huidige state voordat we schonen (voor undo)
-    {
-        let game_lock = state.game.lock().map_err(|e| e.to_string())?;
-        if let Some(current_game) = game_lock.as_ref() {
-            // Debug: toon hoeveel antwoorden we opslaan
-            println!("[SCHOON] Saving state for undo...");
-            for player in &current_game.players {
-                println!("[SCHOON]   Player {}: {} answers", player.name, player.answers.len());
-            }
-            
-            let mut prev_lock = state.previous_game.lock().map_err(|e| e.to_string())?;
-            *prev_lock = Some(current_game.clone());
-            println!("[SCHOON] State saved successfully");
+pub fn save_state_for_undo(state: State<AppState>) -> Result<(), String> {
+    let game_lock = state.game.lock().map_err(|e| e.to_string())?;
+    if let Some(current_game) = game_lock.as_ref() {
+        // Debug: toon hoeveel antwoorden we opslaan
+        println!("[SAVE_FOR_UNDO] Saving state...");
+        for player in &current_game.players {
+            println!("[SAVE_FOR_UNDO]   Player {}: {} answers", player.name, player.answers.len());
         }
+        
+        let mut prev_lock = state.previous_game.lock().map_err(|e| e.to_string())?;
+        *prev_lock = Some(current_game.clone());
+        println!("[SAVE_FOR_UNDO] State saved successfully");
     }
-    
+    Ok(())
+}
+
+#[tauri::command]
+pub fn start_next_round(state: State<AppState>) -> Result<GameState, String> {
     let mut game_lock = state.game.lock().map_err(|e| e.to_string())?;
     let game = game_lock.as_mut()
         .ok_or_else(|| "Geen actief spel".to_string())?;

@@ -45,6 +45,7 @@ pub fn run() {
             commands::advance_phase,
             commands::complete_round,
             commands::start_next_round,
+            commands::save_state_for_undo,
             commands::undo_last_action,
             commands::set_round_number,
             commands::reset_game,
