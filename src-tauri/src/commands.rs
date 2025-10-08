@@ -239,15 +239,8 @@ pub fn complete_round(state: State<AppState>, winner_id: Option<String>) -> Resu
 pub fn save_state_for_undo(state: State<AppState>) -> Result<(), String> {
     let game_lock = state.game.lock().map_err(|e| e.to_string())?;
     if let Some(current_game) = game_lock.as_ref() {
-        // Debug: toon hoeveel antwoorden we opslaan
-        println!("[SAVE_FOR_UNDO] Saving state...");
-        for player in &current_game.players {
-            println!("[SAVE_FOR_UNDO]   Player {}: {} answers", player.name, player.answers.len());
-        }
-        
         let mut prev_lock = state.previous_game.lock().map_err(|e| e.to_string())?;
         *prev_lock = Some(current_game.clone());
-        println!("[SAVE_FOR_UNDO] State saved successfully");
     }
     Ok(())
 }
@@ -273,8 +266,6 @@ pub fn start_next_round(state: State<AppState>) -> Result<GameState, String> {
     let round = Round::new(next_round_num);
     game.start_new_round(round);
     
-    println!("[SCHOON] Started next round, answers cleared");
-    
     Ok(game.clone())
 }
 
@@ -284,14 +275,6 @@ pub fn undo_last_action(state: State<AppState>) -> Result<GameState, String> {
     let mut prev_lock = state.previous_game.lock().map_err(|e| e.to_string())?;
     let previous_game = prev_lock.take()
         .ok_or_else(|| "Geen vorige state beschikbaar om te herstellen".to_string())?;
-    
-    // Debug: toon hoeveel antwoorden we herstellen
-    for player in &previous_game.players {
-        println!("[UNDO] Restoring player {}: {} answers", player.name, player.answers.len());
-        for answer in &player.answers {
-            println!("[UNDO]   - Q{}: {} chars", answer.question_number, answer.image_data.len());
-        }
-    }
     
     let mut game_lock = state.game.lock().map_err(|e| e.to_string())?;
     *game_lock = Some(previous_game.clone());
