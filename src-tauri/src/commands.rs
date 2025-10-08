@@ -5,6 +5,7 @@ use crate::display::{DisplayController, DisplayConfig};
 
 pub struct AppState {
     pub game: Arc<Mutex<Option<GameState>>>,
+    pub previous_game: Arc<Mutex<Option<GameState>>>,
 }
 
 #[tauri::command]
@@ -236,6 +237,15 @@ pub fn complete_round(state: State<AppState>, winner_id: Option<String>) -> Resu
 
 #[tauri::command]
 pub fn start_next_round(state: State<AppState>) -> Result<GameState, String> {
+    // Bewaar huidige state voordat we schonen (voor undo)
+    {
+        let game_lock = state.game.lock().map_err(|e| e.to_string())?;
+        if let Some(current_game) = game_lock.as_ref() {
+            let mut prev_lock = state.previous_game.lock().map_err(|e| e.to_string())?;
+            *prev_lock = Some(current_game.clone());
+        }
+    }
+    
     let mut game_lock = state.game.lock().map_err(|e| e.to_string())?;
     let game = game_lock.as_mut()
         .ok_or_else(|| "Geen actief spel".to_string())?;
@@ -256,6 +266,19 @@ pub fn start_next_round(state: State<AppState>) -> Result<GameState, String> {
     game.start_new_round(round);
     
     Ok(game.clone())
+}
+
+#[tauri::command]
+pub fn undo_last_action(state: State<AppState>) -> Result<GameState, String> {
+    // Herstel de vorige game state
+    let mut prev_lock = state.previous_game.lock().map_err(|e| e.to_string())?;
+    let previous_game = prev_lock.take()
+        .ok_or_else(|| "Geen vorige state beschikbaar om te herstellen".to_string())?;
+    
+    let mut game_lock = state.game.lock().map_err(|e| e.to_string())?;
+    *game_lock = Some(previous_game.clone());
+    
+    Ok(previous_game)
 }
 
 #[tauri::command]

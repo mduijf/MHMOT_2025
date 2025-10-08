@@ -84,6 +84,8 @@ export function QuizmasterView({
   const [customTimerInput, setCustomTimerInput] = useState('');
   const [localTimerSeconds, setLocalTimerSeconds] = useState(timer_seconds);
   const timerIntervalRef = useRef<number | null>(null);
+  const [showUndo, setShowUndo] = useState(false);
+  const undoTimerRef = useRef<number | null>(null);
   
   // Sync lokale timer met backend state
   useEffect(() => {
@@ -212,6 +214,49 @@ export function QuizmasterView({
       alert('Kon rondenummer niet wijzigen');
     }
   };
+
+  const handleSchoon = () => {
+    // Start nieuwe ronde (schonen)
+    onStartNextRound();
+    
+    // Toon undo knop voor 15 seconden
+    setShowUndo(true);
+    
+    // Clear eventuele bestaande timer
+    if (undoTimerRef.current) {
+      clearTimeout(undoTimerRef.current);
+    }
+    
+    // Verberg undo na 15 seconden
+    undoTimerRef.current = window.setTimeout(() => {
+      setShowUndo(false);
+    }, 15000);
+  };
+
+  const handleUndo = async () => {
+    try {
+      await invoke('undo_last_action');
+      setShowUndo(false);
+      
+      // Clear de undo timer
+      if (undoTimerRef.current) {
+        clearTimeout(undoTimerRef.current);
+        undoTimerRef.current = null;
+      }
+    } catch (err) {
+      console.error('Undo failed:', err);
+      alert('Kon laatste actie niet ongedaan maken');
+    }
+  };
+
+  // Cleanup undo timer bij unmount
+  useEffect(() => {
+    return () => {
+      if (undoTimerRef.current) {
+        clearTimeout(undoTimerRef.current);
+      }
+    };
+  }, []);
 
   if (is_finished) {
     const winner = players.reduce((prev, current) => 
@@ -469,12 +514,26 @@ export function QuizmasterView({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', borderTop: '1px solid rgba(255,0,0,0.3)', paddingTop: '8px' }}>
             <label style={{ fontSize: '10px', color: '#ff6b6b', opacity: 0.9, marginBottom: '2px' }}>⚠️ Destructief</label>
             <div style={{ display: 'flex', gap: '4px' }}>
-              <button onClick={onStartNextRound} title="Wis alle schermen en start nieuwe ronde" style={{ padding: '4px 8px', fontSize: '11px', background: '#e67e22', border: '1px solid #d35400', borderRadius: '4px', color: 'white', cursor: 'pointer' }}>
+              <button onClick={handleSchoon} title="Wis alle schermen en start nieuwe ronde" style={{ padding: '4px 8px', fontSize: '11px', background: '#e67e22', border: '1px solid #d35400', borderRadius: '4px', color: 'white', cursor: 'pointer' }}>
                 🗑️ Schoon
               </button>
               <button onClick={() => { onResetGame(); }} title="Reset naar Ronde 1" style={{ padding: '4px 8px', fontSize: '11px', background: '#c0392b', border: '1px solid #a93226', borderRadius: '4px', color: 'white', cursor: 'pointer' }}>
                 🔄 Reset
               </button>
+              {showUndo && (
+                <button onClick={handleUndo} title="Herstel vorige state (15s)" style={{ 
+                  padding: '4px 8px', 
+                  fontSize: '11px', 
+                  background: '#27ae60', 
+                  border: '1px solid #229954', 
+                  borderRadius: '4px', 
+                  color: 'white', 
+                  cursor: 'pointer',
+                  animation: 'pulse 1s infinite'
+                }}>
+                  ↶ UNDO
+                </button>
+              )}
             </div>
           </div>
         </div>

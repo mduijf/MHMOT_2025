@@ -12,6 +12,7 @@ use display::DisplayController;
 pub fn run() {
     // Shared game state voor zowel Tauri commands als HTTP API
     let game_state = Arc::new(Mutex::new(None));
+    let previous_game_state = Arc::new(Mutex::new(None));
     
     // Start HTTP server in background via Tauri setup
     let http_game_state = game_state.clone();
@@ -28,6 +29,7 @@ pub fn run() {
         })
         .manage(AppState {
             game: game_state,
+            previous_game: previous_game_state,
         })
         .manage(DisplayController::new())
         .invoke_handler(tauri::generate_handler![
@@ -43,6 +45,7 @@ pub fn run() {
             commands::advance_phase,
             commands::complete_round,
             commands::start_next_round,
+            commands::undo_last_action,
             commands::set_round_number,
             commands::reset_game,
             commands::toggle_player_active,
