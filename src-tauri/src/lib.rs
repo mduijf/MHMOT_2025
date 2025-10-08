@@ -20,25 +20,13 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .setup(move |app| {
-            // Start HTTP server in Tauri's async context
+            // Start HTTP server in Tauri's async context (for external displays only)
             let http_state = http_game_state.clone();
             tauri::async_runtime::spawn(async move {
                 http_server::start_http_server(http_state).await;
             });
             
-            // In production, redirect the main window to HTTP server via JavaScript
-            #[cfg(not(dev))]
-            {
-                use tauri::Manager;
-                
-                // Give HTTP server time to start
-                std::thread::sleep(std::time::Duration::from_secs(1));
-                
-                // Redirect to HTTP server using JavaScript eval
-                if let Some(window) = app.get_webview_window("main") {
-                    let _ = window.eval("window.location.href = 'http://localhost:3001'");
-                }
-            }
+            // Tauri window uses built-in asset handler - no redirect needed!
             
             Ok(())
         })
