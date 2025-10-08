@@ -1,0 +1,104 @@
+.view-selector-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.view-tabs {
+  display: flex;
+  background: #1a1a2e;
+  padding: 10px;
+  gap: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.tab {
+  flex: 1;
+  padding: 15px 20px;
+  background: #2c2c3e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.tab:hover {
+  background: #3c3c4e;
+  transform: translateY(-2px);
+}
+
+.tab.active {
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8e53 100%);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+}
+
+.view-content {
+  flex: 1;
+  overflow-y: auto;
+  max-height: calc(100vh - 80px);
+}
+
+/* Fullscreen mode voor kandidaat views - UITGESCHAKELD VOOR TESTEN */
+/* 
+.view-selector-container.player-view .view-tabs {
+  display: none;
+}
+
+.view-selector-container.player-view .view-content {
+  max-height: 100vh;
+  overflow: hidden;
+}
+*/
+
+.betting-view {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 40px 20px;
+  color: white;
+}
+
+.betting-view h1 {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 40px;
+}
+
+.betting-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.player-betting-section {
+  background: white;
+  color: #333;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.player-betting-section h2 {
+  font-size: 2rem;
+  color: #ff6b35;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .view-tabs {
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    min-width: calc(50% - 10px);
+  }
+}
+

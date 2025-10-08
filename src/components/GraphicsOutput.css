@@ -1,0 +1,220 @@
+/* Graphics Output - Full HD 1920x1080 */
+.graphics-output {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: transparent;
+  font-family: 'Arial', sans-serif;
+}
+
+/* FILL MODE - Full color graphics */
+.graphics-output.fill-mode {
+  background: url('/graphics_info/Background.tga') no-repeat center center;
+  background-size: cover;
+}
+
+/* KEY MODE - Alpha mask (zwart-wit) */
+.graphics-output.key-mode {
+  background: black;
+}
+
+.graphics-output.key-mode * {
+  /* In key mode: wit = zichtbaar, zwart = transparant */
+  color: white !important;
+  background-color: white !important;
+  border-color: white !important;
+}
+
+/* Timer rechtsboven */
+.timer-display {
+  position: absolute;
+  top: 50px;
+  right: 100px;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  padding: 15px 40px;
+  border-radius: 12px;
+  font-size: 48px;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  letter-spacing: 4px;
+}
+
+.key-mode .timer-display {
+  background: white;
+  box-shadow: none;
+}
+
+/* Player Cards Container */
+.player-cards-container {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+}
+
+/* Individual Player Card */
+.player-card {
+  position: relative;
+  width: 450px;
+  height: 320px;
+  background: linear-gradient(135deg, rgba(200, 150, 200, 0.95) 0%, rgba(220, 180, 200, 0.95) 100%);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  border: 4px solid rgba(150, 100, 150, 0.6);
+}
+
+.key-mode .player-card {
+  background: white;
+  border: 4px solid white;
+  box-shadow: none;
+}
+
+.player-card.card-1 {
+  background: linear-gradient(135deg, rgba(200, 150, 220, 0.95) 0%, rgba(220, 180, 220, 0.95) 100%);
+}
+
+.player-card.card-2 {
+  background: linear-gradient(135deg, rgba(240, 180, 150, 0.95) 0%, rgba(250, 200, 170, 0.95) 100%);
+}
+
+.player-card.card-3 {
+  background: linear-gradient(135deg, rgba(230, 180, 130, 0.95) 0%, rgba(240, 200, 150, 0.95) 100%);
+}
+
+/* Card Balance */
+.card-balance {
+  position: absolute;
+  top: -20px;
+  left: 25px;
+  background: linear-gradient(135deg, rgba(200, 150, 220, 1) 0%, rgba(220, 180, 220, 1) 100%);
+  color: white;
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-size: 36px;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.card-2 .card-balance {
+  background: linear-gradient(135deg, rgba(240, 180, 150, 1) 0%, rgba(250, 200, 170, 1) 100%);
+}
+
+.card-3 .card-balance {
+  background: linear-gradient(135deg, rgba(230, 180, 130, 1) 0%, rgba(240, 200, 150, 1) 100%);
+}
+
+.key-mode .card-balance {
+  background: white;
+  box-shadow: none;
+}
+
+/* Answer Bars */
+.answer-bars {
+  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.answer-bar {
+  width: 100%;
+  height: 45px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.answer-bar.empty {
+  background: rgba(240, 230, 220, 0.8);
+  border: 2px solid rgba(200, 180, 160, 0.5);
+}
+
+.answer-bar.pending {
+  background: rgba(255, 235, 200, 0.9);
+  border: 2px solid rgba(255, 200, 100, 0.7);
+}
+
+.answer-bar.correct {
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  border: 2px solid #2E7D32;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.answer-bar.incorrect {
+  background: linear-gradient(135deg, #F44336 0%, #EF5350 100%);
+  border: 2px solid #C62828;
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+}
+
+.key-mode .answer-bar {
+  border: none;
+}
+
+.key-mode .answer-bar.empty {
+  background: black;
+}
+
+.key-mode .answer-bar.pending,
+.key-mode .answer-bar.correct,
+.key-mode .answer-bar.incorrect {
+  background: white;
+  box-shadow: none;
+}
+
+/* Pot Badge (rechtsboven bij kaart 3) */
+.pot-badge {
+  position: absolute;
+  top: -20px;
+  right: 25px;
+  background: linear-gradient(135deg, rgba(150, 100, 80, 0.95) 0%, rgba(180, 130, 100, 0.95) 100%);
+  color: white;
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-size: 36px;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.key-mode .pot-badge {
+  background: white;
+  box-shadow: none;
+}
+
+/* Debug Info */
+.debug-info {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+}
+
+/* Responsive voor preview in kleinere vensters */
+@media (max-width: 1920px) {
+  .graphics-output {
+    transform-origin: top left;
+    transform: scale(0.8);
+  }
+}
+
+@media (max-width: 1536px) {
+  .graphics-output {
+    transform: scale(0.6);
+  }
+}
+
+@media (max-width: 1280px) {
+  .graphics-output {
+    transform: scale(0.5);
+  }
+}
+

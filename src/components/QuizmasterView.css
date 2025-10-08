@@ -1,0 +1,706 @@
+.quizmaster-view.production {
+  background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+  min-height: 100vh;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  overflow-y: auto;
+  max-height: 100vh;
+}
+
+/* ========== TOP CONTROL BAR ========== */
+.top-control-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 15px 20px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  flex-wrap: wrap;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.control-group label {
+  font-size: 0.75rem;
+  color: #95a5a6;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.round-display,
+.pot-display,
+.min-bet-display {
+  background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  min-width: 60px;
+  text-align: center;
+}
+
+.pot-display {
+  background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+}
+
+.min-bet-display {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+}
+
+.control-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  color: white;
+}
+
+.control-btn.primary {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+}
+
+.control-btn.success {
+  background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+}
+
+.control-btn.secondary {
+  background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+}
+
+.control-btn.danger {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.control-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.phase-indicator {
+  margin-left: auto;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+  color: white;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+}
+
+/* ========== PLAYERS GRID ========== */
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  flex: 1;
+}
+
+/* ========== PLAYER PANEL ========== */
+.player-panel {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s;
+}
+
+.player-panel.folded {
+  opacity: 0.6;
+  filter: grayscale(50%);
+}
+
+.player-panel.eliminated {
+  background: rgba(231, 76, 60, 0.2);
+  border: 2px solid #e74c3c;
+}
+
+.player-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 3px solid #e67e22;
+}
+
+.player-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #2c3e50;
+  font-weight: 700;
+}
+
+.eliminated-badge {
+  background: #e74c3c;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* ========== SCORE SECTION ========== */
+.score-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: #ecf0f1;
+  border-radius: 8px;
+}
+
+.score-section label {
+  font-weight: 600;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+.score-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #27ae60;
+  margin-left: auto;
+}
+
+/* ========== BETTING SECTION ========== */
+.betting-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bet-calculator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: #fff;
+  border: 2px solid #3498db;
+  border-radius: 8px;
+}
+
+.bet-calculator .label {
+  font-weight: 600;
+  color: #7f8c8d;
+  font-size: 0.85rem;
+}
+
+.calculation {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.calculation .base {
+  color: #3498db;
+}
+
+.calculation .operator {
+  color: #95a5a6;
+}
+
+.calculation .extra {
+  color: #e67e22;
+}
+
+.calculation .total {
+  color: #27ae60;
+  font-size: 1.3rem;
+}
+
+/* Quick Bet Buttons */
+.quick-bet-buttons {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+}
+
+.bet-btn {
+  padding: 8px;
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+}
+
+.bet-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(52, 152, 219, 0.4);
+}
+
+.bet-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Status Buttons */
+.status-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.status-btn {
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+}
+
+.status-btn.win {
+  color: #27ae60;
+  border-color: #27ae60;
+}
+
+.status-btn.win.active {
+  background: #27ae60;
+  color: white;
+}
+
+.status-btn.win:not(:disabled):hover {
+  background: #27ae60;
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(39, 174, 96, 0.6);
+}
+
+.status-btn.pass {
+  color: #e67e22;
+  border-color: #e67e22;
+}
+
+.status-btn.pass.active {
+  background: #e67e22;
+  color: white;
+}
+
+.status-btn.mee {
+  color: #3498db;
+  border-color: #3498db;
+}
+
+.status-btn.mee.active {
+  background: #3498db;
+  color: white;
+}
+
+.status-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Afvaller Checkbox */
+.afvaller-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(231, 76, 60, 0.1);
+  border: 2px solid #e74c3c;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  grid-column: span 3;
+  justify-content: center;
+}
+
+.afvaller-checkbox:hover {
+  background: rgba(231, 76, 60, 0.2);
+  transform: scale(1.02);
+}
+
+.afvaller-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #e74c3c;
+}
+
+.afvaller-checkbox span {
+  font-weight: 600;
+  color: #e74c3c;
+  font-size: 0.95rem;
+}
+
+.afvaller-checkbox input[type="checkbox"]:checked ~ span {
+  font-weight: 700;
+}
+
+/* Folded Overlay */
+.folded-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(231, 76, 60, 0.95);
+  color: white;
+  padding: 20px 40px;
+  border-radius: 12px;
+  font-size: 2rem;
+  font-weight: 700;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ========== ANSWERS SECTION ========== */
+.answers-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.answer-row-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.question-number {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #7f8c8d;
+  min-width: 60px;
+}
+
+.answer-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.control-icon-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.control-icon-btn.clear {
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+.control-icon-btn.clear:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+.control-icon-btn.refresh {
+  color: #3498db;
+  border-color: #3498db;
+}
+
+.control-icon-btn.refresh:hover {
+  background: #3498db;
+  color: white;
+}
+
+.answer-preview {
+  flex: 1;
+  min-height: 40px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.answer-thumbnail {
+  max-width: 100%;
+  max-height: 40px;
+  object-fit: contain;
+}
+
+.no-answer {
+  color: #bdc3c7;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.approval-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.approve-icon,
+.reject-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 2px solid;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.approve-icon {
+  color: #27ae60;
+  border-color: #27ae60;
+}
+
+.approve-icon.active {
+  background: #27ae60;
+  color: white;
+}
+
+.reject-icon {
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+.reject-icon.active {
+  background: #e74c3c;
+  color: white;
+}
+
+/* Score Summary */
+.score-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px;
+  background: #ecf0f1;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.correct-count {
+  color: #27ae60;
+}
+
+.total-count {
+  color: #7f8c8d;
+}
+
+/* ========== BOTTOM CONTROL PANEL ========== */
+.bottom-control-panel {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.phase-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.phase-description {
+  color: #ecf0f1;
+  font-size: 1rem;
+  text-align: center;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.phase-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.action-btn {
+  padding: 15px 40px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  color: white;
+}
+
+.action-btn.winner {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  color: white;
+}
+
+.action-btn.next-round {
+  background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+  color: white;
+}
+
+.action-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.winner-instruction {
+  background: rgba(241, 196, 15, 0.2);
+  border: 2px solid #f1c40f;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+}
+
+.winner-instruction p {
+  color: #f1c40f;
+  font-size: 1.2rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.winner-instruction strong {
+  color: #f39c12;
+  font-size: 1.3rem;
+}
+
+/* ========== GAME FINISHED ========== */
+.game-finished {
+  text-align: center;
+  padding: 60px 40px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  max-width: 800px;
+  margin: auto;
+}
+
+.game-finished h1 {
+  color: #f39c12;
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.game-finished h2 {
+  color: #2c3e50;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.final-balance {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #27ae60;
+  margin-bottom: 40px;
+}
+
+.final-standings {
+  background: #ecf0f1;
+  padding: 30px;
+  border-radius: 12px;
+}
+
+.final-standings h3 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+.standing-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+.standing-row .position {
+  font-weight: 700;
+  color: #e67e22;
+  min-width: 40px;
+}
+
+.standing-row .balance {
+  margin-left: auto;
+  font-weight: 700;
+  color: #27ae60;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1400px) {
+  .players-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .players-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .top-control-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .phase-indicator {
+    margin-left: 0;
+  }
+}

@@ -1,0 +1,131 @@
+.betting-controls {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.betting-controls h3 {
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.quick-bets {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.quick-bet-btn {
+  flex: 1;
+  min-width: 60px;
+  padding: 12px;
+  background: #e3f2fd;
+  border: 2px solid #2196f3;
+  border-radius: 8px;
+  color: #2196f3;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.quick-bet-btn:hover:not(.disabled) {
+  background: #2196f3;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.quick-bet-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.custom-bet {
+  margin-bottom: 20px;
+}
+
+.custom-bet label {
+  display: block;
+  color: #666;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.custom-bet input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.custom-bet input:focus {
+  outline: none;
+  border-color: #ff6b35;
+}
+
+.action-buttons {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.bet-button {
+  padding: 15px;
+  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.bet-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+}
+
+.bet-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fold-button {
+  padding: 15px;
+  background: linear-gradient(135deg, #f44336 0%, #e57373 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.fold-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(244, 67, 54, 0.3);
+}
+
+.fold-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.player-info {
+  text-align: center;
+  padding-top: 15px;
+  border-top: 2px solid #f0f0f0;
+}
+
+.player-info p {
+  color: #666;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
