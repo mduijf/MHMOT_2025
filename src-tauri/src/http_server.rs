@@ -111,11 +111,26 @@ fn get_assets_dir() -> PathBuf {
                 return tauri_dev;
             }
             
-            // macOS: Resources are in ../Resources relative to the binary
-            let macos_resources = exe_dir.join("../Resources/dist");
-            if macos_resources.exists() {
-                println!("   📁 Serving assets from: {:?} (macOS bundle)", macos_resources);
-                return macos_resources;
+            // macOS App Bundle: Check multiple possible locations
+            // Pattern 1: Contents/MacOS/../Resources/dist
+            let macos_resources_1 = exe_dir.join("../Resources/dist");
+            if macos_resources_1.exists() {
+                println!("   📁 Serving assets from: {:?} (macOS bundle)", macos_resources_1);
+                return macos_resources_1;
+            }
+            
+            // Pattern 2: Contents/MacOS/../../Contents/Resources/dist (for nested bundles)
+            let macos_resources_2 = exe_dir.join("../../Contents/Resources/dist");
+            if macos_resources_2.exists() {
+                println!("   📁 Serving assets from: {:?} (macOS bundle alt)", macos_resources_2);
+                return macos_resources_2;
+            }
+            
+            // Pattern 3: Check if dist is directly in Resources (without dist subfolder)
+            let macos_resources_root = exe_dir.join("../Resources");
+            if macos_resources_root.join("index.html").exists() {
+                println!("   📁 Serving assets from: {:?} (macOS Resources root)", macos_resources_root);
+                return macos_resources_root;
             }
             
             // Try relative to exe
@@ -124,6 +139,12 @@ fn get_assets_dir() -> PathBuf {
                 println!("   📁 Serving assets from: {:?} (local)", local_dist);
                 return local_dist;
             }
+            
+            // Debug: print the exe path and what we tried
+            println!("   🔍 Executable path: {:?}", exe_path);
+            println!("   🔍 Tried: {:?}", macos_resources_1);
+            println!("   🔍 Tried: {:?}", macos_resources_2);
+            println!("   🔍 Tried: {:?}", macos_resources_root);
         }
     }
     
