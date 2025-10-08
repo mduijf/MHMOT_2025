@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { GameState, BettingPhase } from '../types/game';
 import { invoke } from '@tauri-apps/api/core';
 import './QuizmasterView.css';
@@ -34,6 +35,33 @@ export function QuizmasterView({
   onToggleVideoMode,
 }: QuizmasterViewProps) {
   const { players, current_round, round_number, is_finished, writing_enabled, video_mode_active } = gameState;
+  const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
+  const [editedName, setEditedName] = useState('');
+
+  const handleEditName = (playerId: string, currentName: string) => {
+    setEditingPlayerId(playerId);
+    setEditedName(currentName);
+  };
+
+  const handleSaveName = async (playerId: string) => {
+    if (editedName.trim()) {
+      try {
+        await invoke('update_player_name', { playerId, newName: editedName.trim() });
+        setEditingPlayerId(null);
+        // Force refresh - window.location.reload() is a bit heavy but works
+        window.location.reload();
+      } catch (err) {
+        console.error('Failed to update player name:', err);
+        alert('Kon naam niet bijwerken');
+      }
+    }
+    setEditingPlayerId(null);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingPlayerId(null);
+    setEditedName('');
+  };
 
   if (is_finished) {
     const winner = players.reduce((prev, current) => 
@@ -100,7 +128,31 @@ export function QuizmasterView({
                 background: player.has_folded ? '#2c3e50' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 opacity: player.has_folded ? 0.6 : 1
               }}>
-                <h4>#{index + 1} {player.name}</h4>
+                {editingPlayerId === player.id ? (
+                  <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                    <input
+                      type="text"
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveName(player.id);
+                        if (e.key === 'Escape') handleCancelEdit();
+                      }}
+                      autoFocus
+                      style={{ flex: 1, padding: '5px', fontSize: '16px' }}
+                    />
+                    <button onClick={() => handleSaveName(player.id)} style={{ padding: '5px 10px' }}>✓</button>
+                    <button onClick={handleCancelEdit} style={{ padding: '5px 10px' }}>✕</button>
+                  </div>
+                ) : (
+                  <h4 
+                    onClick={() => handleEditName(player.id, player.name)}
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                    title="Klik om naam te wijzigen"
+                  >
+                    #{index + 1} {player.name} <span style={{ fontSize: '14px', opacity: 0.7 }}>✏️</span>
+                  </h4>
+                )}
                 <p className="balance">€{player.balance}</p>
                 {player.has_folded && <span className="status-badge">Gepast</span>}
               </div>

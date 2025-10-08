@@ -26,9 +26,21 @@ interface ViewSelectorProps {
 
 type ViewType = 'quizmaster' | 'player1' | 'player2' | 'player3' | 'settings' | 'graphics';
 
+const STORAGE_KEY_VIEW = 'mhmot_selected_view';
+
 export function ViewSelector(props: ViewSelectorProps) {
-  const [currentView, setCurrentView] = useState<ViewType>('quizmaster');
+  const [currentView, setCurrentView] = useState<ViewType>(() => {
+    // Lees opgeslagen view uit localStorage
+    const saved = localStorage.getItem(STORAGE_KEY_VIEW);
+    return (saved as ViewType) || 'quizmaster';
+  });
   const { gameState } = props;
+
+  // Save view selection to localStorage
+  const handleViewChange = (view: ViewType) => {
+    setCurrentView(view);
+    localStorage.setItem(STORAGE_KEY_VIEW, view);
+  };
 
   const renderView = () => {
     switch (currentView) {
@@ -90,37 +102,37 @@ export function ViewSelector(props: ViewSelectorProps) {
       <div className="view-tabs">
         <button
           className={`tab ${currentView === 'quizmaster' ? 'active' : ''}`}
-          onClick={() => setCurrentView('quizmaster')}
+          onClick={() => handleViewChange('quizmaster')}
         >
           🎙️ Quizmaster
         </button>
         <button
           className={`tab ${currentView === 'player1' ? 'active' : ''}`}
-          onClick={() => setCurrentView('player1')}
+          onClick={() => handleViewChange('player1')}
         >
           📱 {gameState.players[0]?.name || 'Speler 1'}
         </button>
         <button
           className={`tab ${currentView === 'player2' ? 'active' : ''}`}
-          onClick={() => setCurrentView('player2')}
+          onClick={() => handleViewChange('player2')}
         >
           📱 {gameState.players[1]?.name || 'Speler 2'}
         </button>
         <button
           className={`tab ${currentView === 'player3' ? 'active' : ''}`}
-          onClick={() => setCurrentView('player3')}
+          onClick={() => handleViewChange('player3')}
         >
           📱 {gameState.players[2]?.name || 'Speler 3'}
         </button>
         <button
           className={`tab ${currentView === 'settings' ? 'active' : ''}`}
-          onClick={() => setCurrentView('settings')}
+          onClick={() => handleViewChange('settings')}
         >
           ⚙️ Displays
         </button>
         <button
           className={`tab ${currentView === 'graphics' ? 'active' : ''}`}
-          onClick={() => setCurrentView('graphics')}
+          onClick={() => handleViewChange('graphics')}
         >
           📺 Graphics (Fill/Key)
         </button>

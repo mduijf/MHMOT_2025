@@ -55,6 +55,7 @@ pub fn run() {
             commands::test_displays,
             commands::clear_displays,
             commands::check_for_updates,
+            commands::update_player_name,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

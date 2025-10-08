@@ -29,6 +29,18 @@ function App() {
     toggleVideoMode,
   } = useGame();
 
+  // Auto-start game met default namen bij eerste load
+  useEffect(() => {
+    const autoStartGame = async () => {
+      if (!gameState && !loading && !error) {
+        const defaultNames = ['Kandidaat 1', 'Kandidaat 2', 'Kandidaat 3'];
+        await startNewGame(defaultNames);
+        setGameStarted(true);
+      }
+    };
+    autoStartGame();
+  }, [gameState, loading, error, startNewGame]);
+
   // Auto-update displays wanneer game state verandert
   useEffect(() => {
     if (gameState) {

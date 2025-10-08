@@ -418,3 +418,18 @@ pub fn toggle_writing(enabled: bool, state: State<AppState>) -> Result<GameState
 pub async fn check_for_updates() -> Result<crate::updater::UpdateInfo, String> {
     crate::updater::check_for_updates().await
 }
+
+#[tauri::command]
+pub fn update_player_name(player_id: String, new_name: String, state: State<AppState>) -> Result<GameState, String> {
+    let mut game_lock = state.game.lock().map_err(|e| e.to_string())?;
+    let game = game_lock.as_mut()
+        .ok_or_else(|| "Geen actief spel".to_string())?;
+    
+    // Zoek de speler en update de naam
+    if let Some(player) = game.players.iter_mut().find(|p| p.id == player_id) {
+        player.name = new_name;
+        Ok(game.clone())
+    } else {
+        Err(format!("Speler {} niet gevonden", player_id))
+    }
+}
