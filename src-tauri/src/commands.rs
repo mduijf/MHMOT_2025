@@ -492,6 +492,28 @@ pub fn start_timer(state: State<AppState>) -> Result<GameState, String> {
     game.timer_running = true;
     println!("[start_timer] Timer started");
     
+    // Start background timer task
+    let game_state = state.game.clone();
+    tauri::async_runtime::spawn(async move {
+        loop {
+            tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+            
+            let mut lock = match game_state.lock() {
+                Ok(l) => l,
+                Err(_) => break,
+            };
+            
+            if let Some(game) = lock.as_mut() {
+                if !game.timer_running {
+                    break; // Stop de timer task als de timer is gestopt
+                }
+                game.timer_seconds += 1;
+            } else {
+                break;
+            }
+        }
+    });
+    
     Ok(game.clone())
 }
 

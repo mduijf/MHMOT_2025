@@ -84,44 +84,13 @@ export function QuizmasterView({
   const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
   const [editedName, setEditedName] = useState('');
   const [customTimerInput, setCustomTimerInput] = useState('');
-  const [localTimerSeconds, setLocalTimerSeconds] = useState(timer_seconds);
-  const timerIntervalRef = useRef<number | null>(null);
   const [showUndo, setShowUndo] = useState(false);
   const undoTimerRef = useRef<number | null>(null);
-  
-  // Sync lokale timer met backend state
-  useEffect(() => {
-    setLocalTimerSeconds(timer_seconds);
-  }, [timer_seconds]);
   
   // Bepaal wie de eerste hand heeft
   const firstHandPlayer = getFirstHandPlayer(round_number, players);
   
-  // Timer interval effect - lokaal bijhouden voor smooth updates
-  useEffect(() => {
-    if (timer_running) {
-      timerIntervalRef.current = window.setInterval(async () => {
-        // Lokaal direct updaten voor smooth weergave
-        setLocalTimerSeconds(prev => prev + 1);
-        
-        // Backend tick voor persistentie
-        try {
-          await invoke('tick_timer');
-        } catch (err) {
-          console.error('Timer tick failed:', err);
-        }
-      }, 1000);
-    } else if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current);
-      timerIntervalRef.current = null;
-    }
-    
-    return () => {
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current);
-      }
-    };
-  }, [timer_running]);
+  // Timer loopt nu volledig in de backend - geen frontend setInterval meer nodig!
   
   // Timer handlers
   const handleTimerStart = async () => {
@@ -181,6 +150,9 @@ export function QuizmasterView({
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+  
+  // Gebruik de timer_seconds direct uit de backend
+  const displayTime = timer_seconds;
 
   const handleEditName = (playerId: string, currentName: string) => {
     setEditingPlayerId(playerId);
@@ -476,7 +448,7 @@ export function QuizmasterView({
               borderRadius: '4px',
               color: '#fff'
             }}>
-              {formatTime(localTimerSeconds)}
+              {formatTime(displayTime)}
             </div>
             <button onClick={handleTimerStart} disabled={timer_running} style={{ padding: '4px 10px', fontSize: '14px', background: timer_running ? '#444' : '#4CAF50', border: 'none', borderRadius: '4px', color: 'white', cursor: timer_running ? 'not-allowed' : 'pointer' }}>▶</button>
             <button onClick={handleTimerStop} disabled={!timer_running} style={{ padding: '4px 10px', fontSize: '14px', background: !timer_running ? '#444' : '#ff9800', border: 'none', borderRadius: '4px', color: 'white', cursor: !timer_running ? 'not-allowed' : 'pointer' }}>⏸</button>

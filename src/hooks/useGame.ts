@@ -188,7 +188,7 @@ export function useGame() {
     if (gameState && !gameState.is_finished && !loading) {
       const interval = setInterval(() => {
         refreshGameState().catch(console.error);
-      }, 2000); // Elke 2 seconden refreshen
+      }, 200); // Elke 200ms refreshen voor smooth timer updates (5fps)
 
       return () => clearInterval(interval);
     }
