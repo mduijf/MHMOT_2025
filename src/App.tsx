@@ -20,7 +20,6 @@ function App() {
     addBetsToPot,
     placeBet,
     playerFold,
-    advancePhase,
     completeRound,
     startNextRound,
     resetGame,
@@ -98,14 +97,6 @@ function App() {
     }
   };
 
-  const handleAdvancePhase = async () => {
-    try {
-      await advancePhase();
-    } catch (err) {
-      console.error('Fout bij doorgaan naar volgende fase:', err);
-      alert('Er is een fout opgetreden bij het doorgaan naar de volgende fase');
-    }
-  };
 
   const handleCompleteRound = async (winnerId?: string) => {
     try {
@@ -205,7 +196,6 @@ function App() {
         onAddToPot={handleAddToPot}
         onPlaceBet={handlePlaceBet}
         onFold={handleFold}
-        onAdvancePhase={handleAdvancePhase}
         onCompleteRound={handleCompleteRound}
         onStartNextRound={handleStartNextRound}
         onResetGame={handleResetGame}

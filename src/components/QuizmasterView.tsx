@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { GameState, BettingPhase } from '../types/game';
 import { invoke } from '@tauri-apps/api/core';
 import './QuizmasterView.css';
@@ -10,7 +10,6 @@ interface QuizmasterViewProps {
   onAddToPot: () => void;
   onPlaceBet?: (playerId: string, amount: number) => void;
   onPlayerFold: (playerId: string) => void;
-  onAdvancePhase: () => void;
   onCompleteRound: (winnerId?: string) => void;
   onStartNextRound: () => void;
   onResetGame: () => void;
@@ -19,6 +18,16 @@ interface QuizmasterViewProps {
   onToggleVideoMode: () => void;
   onSetRoundNumber: (roundNum: number) => Promise<any>;
   onUpdatePlayerName: (playerId: string, newName: string) => Promise<any>;
+}
+
+// Helper: verkrijg kandidaatnummer op basis van player.id
+function getPlayerNumber(playerId: string): number {
+  // player_0 = Kandidaat 1, player_1 = Kandidaat 2, player_2 = Kandidaat 3
+  const match = playerId.match(/player_(\d+)/);
+  if (match) {
+    return parseInt(match[1]) + 1;
+  }
+  return 0;
 }
 
 // Bepaal wie de eerste hand heeft op basis van rondenummer
@@ -60,7 +69,6 @@ export function QuizmasterView({
   onAddToPot,
   onPlaceBet,
   onPlayerFold,
-  onAdvancePhase,
   onCompleteRound,
   onStartNextRound,
   onResetGame,
@@ -70,12 +78,105 @@ export function QuizmasterView({
   onSetRoundNumber,
   onUpdatePlayerName,
 }: QuizmasterViewProps) {
-  const { players, current_round, round_number, is_finished, writing_enabled, video_mode_active } = gameState;
+  const { players, current_round, round_number, is_finished, writing_enabled, video_mode_active, timer_seconds, timer_running } = gameState;
   const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
   const [editedName, setEditedName] = useState('');
+  const [customTimerInput, setCustomTimerInput] = useState('');
+  const [localTimerSeconds, setLocalTimerSeconds] = useState(timer_seconds);
+  const timerIntervalRef = useRef<number | null>(null);
+  
+  // Sync lokale timer met backend state
+  useEffect(() => {
+    setLocalTimerSeconds(timer_seconds);
+  }, [timer_seconds]);
   
   // Bepaal wie de eerste hand heeft
   const firstHandPlayer = getFirstHandPlayer(round_number, players);
+  
+  // Timer interval effect - lokaal bijhouden voor smooth updates
+  useEffect(() => {
+    if (timer_running) {
+      timerIntervalRef.current = window.setInterval(async () => {
+        // Lokaal direct updaten voor smooth weergave
+        setLocalTimerSeconds(prev => prev + 1);
+        
+        // Backend tick voor persistentie
+        try {
+          await invoke('tick_timer');
+        } catch (err) {
+          console.error('Timer tick failed:', err);
+        }
+      }, 1000);
+    } else if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+    
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+    };
+  }, [timer_running]);
+  
+  // Timer handlers
+  const handleTimerStart = async () => {
+    try {
+      await invoke('start_timer');
+    } catch (err) {
+      console.error('Failed to start timer:', err);
+    }
+  };
+  
+  const handleTimerStop = async () => {
+    try {
+      await invoke('stop_timer');
+    } catch (err) {
+      console.error('Failed to stop timer:', err);
+    }
+  };
+  
+  const handleTimerReset = async () => {
+    try {
+      await invoke('reset_timer');
+    } catch (err) {
+      console.error('Failed to reset timer:', err);
+    }
+  };
+  
+  const handleSetTimer = async (seconds: number) => {
+    try {
+      await invoke('set_timer', { seconds });
+    } catch (err) {
+      console.error('Failed to set timer:', err);
+    }
+  };
+  
+  const handleCustomTimerSet = async () => {
+    const parts = customTimerInput.split(':');
+    let totalSeconds = 0;
+    
+    if (parts.length === 1) {
+      // Alleen seconden
+      totalSeconds = parseInt(parts[0]) || 0;
+    } else if (parts.length === 2) {
+      // Minuten:seconden
+      const mins = parseInt(parts[0]) || 0;
+      const secs = parseInt(parts[1]) || 0;
+      totalSeconds = mins * 60 + secs;
+    }
+    
+    if (totalSeconds > 0) {
+      await handleSetTimer(totalSeconds);
+      setCustomTimerInput('');
+    }
+  };
+  
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const handleEditName = (playerId: string, currentName: string) => {
     setEditingPlayerId(playerId);
@@ -251,143 +352,202 @@ export function QuizmasterView({
 
   return (
     <div className="quizmaster-view production">
-      {/* Top Control Bar */}
-      <div className="top-control-bar">
-        <div className="control-group">
-          <label>Ronde</label>
-          <div className="round-display" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      {/* Top Control Bar - Compact & Clean */}
+      <div className="top-control-bar" style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'auto auto auto 1fr auto auto auto',
+        gap: '15px',
+        alignItems: 'start',
+        padding: '10px 15px',
+        background: 'rgba(0, 0, 0, 0.3)',
+        borderRadius: '8px',
+        marginBottom: '8px'
+      }}>
+        
+        {/* Ronde Info + Navigatie */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <label style={{ fontSize: '11px', color: '#fff', opacity: 0.8, marginBottom: '2px' }}>Ronde</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button 
               onClick={() => handleChangeRound(round_number - 1)}
               disabled={round_number <= 1}
               style={{ 
-                background: 'none', 
+                background: 'rgba(255,255,255,0.1)', 
                 border: 'none', 
-                color: round_number <= 1 ? '#666' : '#fff', 
-                fontSize: '20px', 
+                color: round_number <= 1 ? '#888' : '#fff', 
+                fontSize: '16px', 
                 cursor: round_number <= 1 ? 'not-allowed' : 'pointer',
-                padding: '0 5px'
+                padding: '4px 8px',
+                borderRadius: '4px'
               }}
               title="Vorige ronde"
             >
               ◀
             </button>
-            <span>{round_number} / 7</span>
+            <span style={{ fontSize: '18px', fontWeight: 'bold', minWidth: '50px', textAlign: 'center', color: '#fff' }}>{round_number} / 7</span>
             <button 
               onClick={() => handleChangeRound(round_number + 1)}
               disabled={round_number >= 7}
               style={{ 
-                background: 'none', 
+                background: 'rgba(255,255,255,0.1)', 
                 border: 'none', 
-                color: round_number >= 7 ? '#666' : '#fff', 
-                fontSize: '20px', 
+                color: round_number >= 7 ? '#888' : '#fff', 
+                fontSize: '16px', 
                 cursor: round_number >= 7 ? 'not-allowed' : 'pointer',
-                padding: '0 5px'
+                padding: '4px 8px',
+                borderRadius: '4px'
               }}
               title="Volgende ronde"
             >
               ▶
             </button>
           </div>
-        </div>
-
-        <div className="control-group">
-          <label>Eerste Hand</label>
-          <div className="first-hand-display" style={{
-            padding: '8px 16px',
-            background: 'rgba(255, 255, 255, 0.1)',
-            borderRadius: '4px',
-            fontWeight: 'bold'
-          }}>
-            {firstHandPlayer ? firstHandPlayer.name : '-'}
+          <div style={{ fontSize: '12px', color: '#fff', opacity: 0.9 }}>
+            👋 {firstHandPlayer ? `#${getPlayerNumber(firstHandPlayer.id)} ${firstHandPlayer.name}` : '-'}
           </div>
         </div>
 
-        <div className="control-group">
-          <label>Pot</label>
-          <div className="pot-display">€{current_round.pot}</div>
-        </div>
-
-        <div className="control-group">
-          <label>Min. Inzet</label>
-          <div className="min-bet-display">€{current_round.min_bet}</div>
-        </div>
-
-        <button 
-          className="control-btn primary"
-          onClick={onCollectBets}
-          title="Verzamel 3x minimale inzet"
-        >
-          💰 Verzamel Inzetten (3×€{current_round.min_bet})
-        </button>
-
-        <button 
-          className="control-btn success"
-          onClick={onAddToPot}
-          title="Voeg inzetten toe aan pot"
-        >
-          📥 Bij Pot
-        </button>
-
-        <button 
-          className="control-btn secondary"
-          onClick={onStartNextRound}
-          title="Wis alle schermen en start nieuwe ronde"
-        >
-          🗑️ Scherm Schoon
-        </button>
-
-        <button 
-          className={`control-btn ${gameState.video_mode_active ? 'warning' : 'info'}`}
-          onClick={onToggleVideoMode}
-          title="Schakel externe video weergave op kandidaat displays"
-        >
-          {gameState.video_mode_active ? '📹 Video AAN' : '📹 Video'}
-        </button>
-
-        <div className="control-group checkbox-group">
-          <label>
-            <input 
-              type="checkbox" 
-              checked={writing_enabled}
-              onChange={async (e) => {
-                try {
-                  await invoke('toggle_writing', { enabled: e.target.checked });
-                } catch (err) {
-                  console.error('Error toggling writing:', err);
-                  alert(err);
-                }
+        {/* Timer - Compact */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <label style={{ fontSize: '11px', color: '#fff', opacity: 0.8, marginBottom: '2px' }}>⏱️ Timer</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{
+              fontSize: '20px',
+              fontWeight: 'bold',
+              minWidth: '70px',
+              textAlign: 'center',
+              padding: '4px 8px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '4px',
+              color: '#fff'
+            }}>
+              {formatTime(localTimerSeconds)}
+            </div>
+            <button onClick={handleTimerStart} disabled={timer_running} style={{ padding: '4px 10px', fontSize: '14px', background: timer_running ? '#444' : '#4CAF50', border: 'none', borderRadius: '4px', color: 'white', cursor: timer_running ? 'not-allowed' : 'pointer' }}>▶</button>
+            <button onClick={handleTimerStop} disabled={!timer_running} style={{ padding: '4px 10px', fontSize: '14px', background: !timer_running ? '#444' : '#ff9800', border: 'none', borderRadius: '4px', color: 'white', cursor: !timer_running ? 'not-allowed' : 'pointer' }}>⏸</button>
+            <button onClick={handleTimerReset} style={{ padding: '4px 10px', fontSize: '14px', background: '#f44336', border: 'none', borderRadius: '4px', color: 'white', cursor: 'pointer' }}>🔄</button>
+          </div>
+          <div style={{ display: 'flex', gap: '4px' }}>
+            <input
+              type="text"
+              value={customTimerInput}
+              onChange={(e) => setCustomTimerInput(e.target.value)}
+              placeholder="1:30"
+              onKeyDown={(e) => { if (e.key === 'Enter') handleCustomTimerSet(); }}
+              style={{
+                width: '60px',
+                padding: '3px 6px',
+                fontSize: '12px',
+                background: 'rgba(255, 255, 255, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: '3px',
+                color: '#fff'
               }}
-              disabled={video_mode_active}
             />
-            ✍️ Schrijven Mag {video_mode_active && '(geblokkeerd tijdens video)'}
-          </label>
+            <button onClick={handleCustomTimerSet} style={{ padding: '3px 8px', fontSize: '11px', background: '#2196F3', border: 'none', borderRadius: '3px', color: 'white', cursor: 'pointer' }}>Set</button>
+            <button onClick={() => handleSetTimer(60)} style={{ padding: '3px 6px', fontSize: '10px', background: '#555', border: 'none', borderRadius: '3px', color: 'white', cursor: 'pointer' }}>1m</button>
+            <button onClick={() => handleSetTimer(90)} style={{ padding: '3px 6px', fontSize: '10px', background: '#555', border: 'none', borderRadius: '3px', color: 'white', cursor: 'pointer' }}>1:30</button>
+            <button onClick={() => handleSetTimer(120)} style={{ padding: '3px 6px', fontSize: '10px', background: '#555', border: 'none', borderRadius: '3px', color: 'white', cursor: 'pointer' }}>2m</button>
+          </div>
         </div>
 
-        <button 
-          className="control-btn danger"
-          onClick={() => {
-            console.log('[QuizmasterView] Reset button clicked');
-            console.log('[QuizmasterView] Calling onResetGame...');
-            onResetGame();
-          }}
-          title="Reset naar Ronde 1"
-        >
-          🔄 Reset naar Ronde 1
-        </button>
+        {/* Extra Controls - Compacter */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <label style={{ fontSize: '11px', color: '#fff', opacity: 0.8, marginBottom: '2px' }}>Controls</label>
+          <div style={{ display: 'flex', gap: '4px' }}>
+            <button onClick={onStartNextRound} title="Wis alle schermen en start nieuwe ronde" style={{ padding: '4px 8px', fontSize: '11px', background: '#546e7a', border: 'none', borderRadius: '4px', color: 'white', cursor: 'pointer' }}>
+              🗑️ Schoon
+            </button>
+            <button onClick={onToggleVideoMode} title="Schakel externe video weergave" style={{ padding: '4px 8px', fontSize: '11px', background: gameState.video_mode_active ? '#ff9800' : '#546e7a', border: 'none', borderRadius: '4px', color: 'white', cursor: 'pointer' }}>
+              {gameState.video_mode_active ? '📹 AAN' : '📹'}
+            </button>
+          </div>
+          <div style={{ display: 'flex', gap: '4px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 6px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '3px', cursor: 'pointer', fontSize: '10px', color: '#fff' }}>
+              <input type="checkbox" checked={writing_enabled} onChange={async (e) => { try { await invoke('toggle_writing', { enabled: e.target.checked }); } catch (err) { console.error('Error toggling writing:', err); } }} disabled={video_mode_active} style={{ cursor: 'pointer' }} />
+              ✍️ {video_mode_active ? '❌' : '✓'}
+            </label>
+            <button onClick={() => { onResetGame(); }} title="Reset naar Ronde 1" style={{ padding: '4px 8px', fontSize: '11px', background: '#d32f2f', border: 'none', borderRadius: '4px', color: 'white', cursor: 'pointer' }}>
+              🔄
+            </button>
+          </div>
+        </div>
 
-        <div className="phase-indicator">
-          {getPhaseText(phase)}
+        {/* Spacer */}
+        <div></div>
+
+        {/* Pot & Inzet Info */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'right' }}>
+          <div>
+            <label style={{ fontSize: '11px', color: '#fff', opacity: 0.8, display: 'block' }}>Pot</label>
+            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#FFD700' }}>€{current_round.pot}</div>
+          </div>
+          <div>
+            <label style={{ fontSize: '11px', color: '#fff', opacity: 0.8, display: 'block' }}>Min. Inzet</label>
+            <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#fff' }}>€{current_round.min_bet}</div>
+          </div>
+        </div>
+
+        {/* Action Buttons + Phase */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-end' }}>
+          <div style={{ 
+            padding: '4px 12px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: '4px',
+            fontSize: '11px',
+            fontWeight: '600',
+            color: '#fff',
+            marginBottom: '2px'
+          }}>
+            {getPhaseText(phase)}
+          </div>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <button 
+              onClick={onCollectBets}
+              title="Verzamel 3x minimale inzet"
+              style={{
+                padding: '6px 12px',
+                fontSize: '11px',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                border: 'none',
+                borderRadius: '4px',
+                color: 'white',
+                cursor: 'pointer',
+                fontWeight: '600',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              💰 Verzamel
+            </button>
+            <button 
+              onClick={onAddToPot}
+              title="Voeg inzetten toe aan pot"
+              style={{
+                padding: '6px 12px',
+                fontSize: '11px',
+                background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                border: 'none',
+                borderRadius: '4px',
+                color: 'white',
+                cursor: 'pointer',
+                fontWeight: '600',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              📥 Bij Pot
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Reveal Knoppen - Compact boven de spelers (Toggle: klik nogmaals om te verbergen) */}
       <div style={{ 
         display: 'flex', 
-        gap: '8px', 
+        gap: '6px', 
         justifyContent: 'center', 
-        padding: '10px 0',
+        padding: '6px 0',
         borderBottom: '1px solid #333',
-        marginBottom: '15px'
+        marginBottom: '8px'
       }}>
         <span style={{ fontSize: '14px', color: '#888', alignSelf: 'center', marginRight: '10px' }}>
           👁️ Reveal:
@@ -401,8 +561,8 @@ export function QuizmasterView({
               onClick={() => onRevealQuestion(questionNum)}
               title={isRevealed ? 'Klik om te verbergen' : 'Klik om te tonen'}
               style={{
-                padding: '6px 12px',
-                fontSize: '13px',
+                padding: '4px 10px',
+                fontSize: '12px',
                 background: isRevealed ? '#2d5016' : '#1a1a1a',
                 color: isRevealed ? '#4CAF50' : '#888',
                 border: `1px solid ${isRevealed ? '#4CAF50' : '#333'}`,
@@ -437,7 +597,64 @@ export function QuizmasterView({
           >
             {/* Player Header */}
             <div className="player-header">
-              <h2>{player.name}</h2>
+              {editingPlayerId === player.id ? (
+                <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flex: 1 }}>
+                  <input
+                    type="text"
+                    value={editedName}
+                    onChange={(e) => setEditedName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveName(player.id);
+                      if (e.key === 'Escape') handleCancelEdit();
+                    }}
+                    autoFocus
+                    style={{ 
+                      flex: 1, 
+                      padding: '4px 8px', 
+                      fontSize: '1.1rem',
+                      fontWeight: '700',
+                      border: '2px solid #3498db',
+                      borderRadius: '4px'
+                    }}
+                  />
+                  <button 
+                    onClick={() => handleSaveName(player.id)} 
+                    style={{ 
+                      padding: '4px 10px', 
+                      background: '#27ae60', 
+                      color: 'white', 
+                      border: 'none', 
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '14px'
+                    }}
+                  >
+                    ✓
+                  </button>
+                  <button 
+                    onClick={handleCancelEdit} 
+                    style={{ 
+                      padding: '4px 10px', 
+                      background: '#e74c3c', 
+                      color: 'white', 
+                      border: 'none', 
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '14px'
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <h2 
+                  onClick={() => handleEditName(player.id, player.name)}
+                  style={{ cursor: 'pointer', margin: 0 }}
+                  title="Klik om naam te wijzigen"
+                >
+                  #{getPlayerNumber(player.id)} {player.name} ✏️
+                </h2>
+              )}
               {player.balance <= 0 && (
                 <span className="eliminated-badge">❌ Afgevallen</span>
               )}
@@ -624,59 +841,6 @@ export function QuizmasterView({
           </div>
         ))}
       </div>
-
-      {/* Bottom Control Panel */}
-      <div className="bottom-control-panel">
-        <div className="phase-controls">
-          <div className="phase-description">
-            {getPhaseDescription(phase)}
-          </div>
-          
-          <div className="phase-actions">
-            {phase === BettingPhase.Initial && (
-              <button className="action-btn primary" onClick={onAdvancePhase}>
-                ▶️ Start Verzamelen Inzetten
-              </button>
-            )}
-            
-            {phase === BettingPhase.CollectingBets && (
-              <button className="action-btn primary" onClick={onAdvancePhase}>
-                🎰 Start Eerste Inzetronde
-              </button>
-            )}
-            
-            {phase === BettingPhase.FirstBetting && (
-              <button className="action-btn primary" onClick={onAdvancePhase}>
-                👁️ Start Reveal Fase
-              </button>
-            )}
-            
-            {phase === BettingPhase.RevealingAnswers && (
-              <button className="action-btn primary" onClick={onAdvancePhase}>
-                💰 Start Tweede Inzetronde
-              </button>
-            )}
-            
-            {phase === BettingPhase.SecondBetting && (
-              <button className="action-btn primary" onClick={onAdvancePhase}>
-                🎯 Winnaar Bepalen
-              </button>
-            )}
-            
-            {phase === BettingPhase.DetermineWinner && (
-              <div className="winner-instruction">
-                <p>👆 Klik op de <strong>WIN</strong> knop bij de winnende speler</p>
-              </div>
-            )}
-            
-            {phase === BettingPhase.Completed && round_number < 7 && (
-              <button className="action-btn next-round" onClick={onStartNextRound}>
-                ▶️ Volgende Ronde
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
@@ -690,24 +854,5 @@ function getPhaseText(phase: BettingPhase): string {
     case BettingPhase.SecondBetting: return '💰 2e INZET';
     case BettingPhase.DetermineWinner: return '🏆 WINNAAR';
     case BettingPhase.Completed: return '✅ VOLTOOID';
-  }
-}
-
-function getPhaseDescription(phase: BettingPhase): string {
-  switch (phase) {
-    case BettingPhase.Initial: 
-      return 'Kandidaten schrijven antwoorden. Beoordeel LIVE met ✓/✗.';
-    case BettingPhase.CollectingBets: 
-      return 'Klik "Verzamel Inzetten" om 3×min.inzet te verzamelen, dan "Bij Pot".';
-    case BettingPhase.FirstBetting: 
-      return 'Eerste inzetronde: Dealer begint, anderen volgen.';
-    case BettingPhase.RevealingAnswers: 
-      return 'Antwoorden 1-voor-1 tonen aan kandidaten met goed/fout status.';
-    case BettingPhase.SecondBetting: 
-      return 'Tweede inzetronde: Dealer begint opnieuw.';
-    case BettingPhase.DetermineWinner: 
-      return 'Bepaal winnaar handmatig op basis van goedgekeurde antwoorden.';
-    case BettingPhase.Completed: 
-      return 'Ronde voltooid. Klik "Volgende Ronde" om door te gaan.';
   }
 }

@@ -111,22 +111,6 @@ export function useGame() {
     }
   };
 
-  const advancePhase = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const game = await invoke<GameState>('advance_phase');
-      setGameState(game);
-      return game;
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      setError(errorMsg);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const completeRound = async (winnerId?: string) => {
     try {
       setLoading(true);
@@ -303,7 +287,6 @@ export function useGame() {
     addBetsToPot,
     placeBet,
     playerFold,
-    advancePhase,
     completeRound,
     startNextRound,
     resetGame,

@@ -1,10 +1,10 @@
 .quizmaster-view.production {
   background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
   min-height: 100vh;
-  padding: 15px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 8px;
   overflow-y: auto;
   max-height: 100vh;
 }
@@ -118,18 +118,18 @@
 .players-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
+  gap: 8px;
   flex: 1;
 }
 
 /* ========== PLAYER PANEL ========== */
 .player-panel {
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
-  padding: 15px;
+  border-radius: 8px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   position: relative;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   transition: all 0.3s;
@@ -149,13 +149,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 10px;
-  border-bottom: 3px solid #e67e22;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #e67e22;
 }
 
 .player-header h2 {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 1.1rem;
   color: #2c3e50;
   font-weight: 700;
 }
@@ -173,20 +173,20 @@
 .score-section {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
+  gap: 8px;
+  padding: 5px 10px;
   background: #ecf0f1;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .score-section label {
   font-weight: 600;
   color: #7f8c8d;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
 .score-value {
-  font-size: 1.8rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: #27ae60;
   margin-left: auto;
@@ -196,23 +196,23 @@
 .betting-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .bet-calculator {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px;
+  gap: 6px;
+  padding: 6px 8px;
   background: #fff;
   border: 2px solid #3498db;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .bet-calculator .label {
   font-weight: 600;
   color: #7f8c8d;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
 }
 
 .calculation {
@@ -245,19 +245,19 @@
 .quick-bet-buttons {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 5px;
+  gap: 4px;
 }
 
 .bet-btn {
-  padding: 8px;
+  padding: 4px 6px;
   background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
   color: white;
   border: none;
-  border-radius: 6px;
-  font-weight: 700;
+  border-radius: 4px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  font-size: 1rem;
+  font-size: 0.85rem;
 }
 
 .bet-btn:hover:not(:disabled) {
@@ -274,15 +274,15 @@
 .status-buttons {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 5px;
+  gap: 4px;
 }
 
 .status-btn {
-  padding: 10px;
+  padding: 6px 8px;
   border: 2px solid #ddd;
-  border-radius: 6px;
-  font-weight: 700;
-  font-size: 1rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s;
   background: white;
@@ -334,11 +334,11 @@
 .afvaller-checkbox {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 6px;
+  padding: 5px 8px;
   background: rgba(231, 76, 60, 0.1);
   border: 2px solid #e74c3c;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
   grid-column: span 3;
@@ -388,25 +388,25 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 300px;
+  max-height: 450px;
   overflow-y: auto;
 }
 
 .answer-row-compact {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
+  gap: 6px;
+  padding: 4px 6px;
   background: #f8f9fa;
-  border-radius: 6px;
+  border-radius: 4px;
   border: 1px solid #e0e0e0;
 }
 
 .question-number {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: #7f8c8d;
-  min-width: 60px;
+  min-width: 45px;
 }
 
 .answer-controls {
@@ -453,10 +453,10 @@
 
 .answer-preview {
   flex: 1;
-  min-height: 40px;
+  min-height: 90px;
   background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -465,7 +465,7 @@
 
 .answer-thumbnail {
   max-width: 100%;
-  max-height: 40px;
+  max-height: 90px;
   object-fit: contain;
 }
 
@@ -522,12 +522,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 8px;
+  gap: 4px;
+  padding: 5px;
   background: #ecf0f1;
-  border-radius: 6px;
+  border-radius: 4px;
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
 }
 
 .correct-count {

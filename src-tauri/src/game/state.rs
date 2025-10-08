@@ -14,6 +14,8 @@ pub struct GameState {
     pub video_mode_active: bool, // Toggle voor externe video weergave
     pub video_device_id: Option<String>, // Optioneel: specifiek video device
     pub writing_enabled: bool, // Toggle om schrijven toe te staan
+    pub timer_seconds: i32, // Timer in seconden
+    pub timer_running: bool, // Of de timer loopt
 }
 
 impl GameState {
@@ -36,6 +38,8 @@ impl GameState {
             video_mode_active: false,
             video_device_id: None,
             writing_enabled: true, // Standaard aan
+            timer_seconds: 0,
+            timer_running: false,
         }
     }
 

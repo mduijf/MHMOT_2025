@@ -448,6 +448,68 @@ pub fn toggle_video_mode(state: State<AppState>) -> Result<GameState, String> {
 }
 
 #[tauri::command]
+pub fn set_timer(seconds: i32, state: State<AppState>) -> Result<GameState, String> {
+    let mut game_lock = state.game.lock().map_err(|e| e.to_string())?;
+    let game = game_lock.as_mut()
+        .ok_or_else(|| "Geen actief spel".to_string())?;
+    
+    game.timer_seconds = seconds;
+    println!("[set_timer] Timer set to: {}s", seconds);
+    
+    Ok(game.clone())
+}
+
+#[tauri::command]
+pub fn start_timer(state: State<AppState>) -> Result<GameState, String> {
+    let mut game_lock = state.game.lock().map_err(|e| e.to_string())?;
+    let game = game_lock.as_mut()
+        .ok_or_else(|| "Geen actief spel".to_string())?;
+    
+    game.timer_running = true;
+    println!("[start_timer] Timer started");
+    
+    Ok(game.clone())
+}
+
+#[tauri::command]
+pub fn stop_timer(state: State<AppState>) -> Result<GameState, String> {
+    let mut game_lock = state.game.lock().map_err(|e| e.to_string())?;
+    let game = game_lock.as_mut()
+        .ok_or_else(|| "Geen actief spel".to_string())?;
+    
+    game.timer_running = false;
+    println!("[stop_timer] Timer stopped");
+    
+    Ok(game.clone())
+}
+
+#[tauri::command]
+pub fn reset_timer(state: State<AppState>) -> Result<GameState, String> {
+    let mut game_lock = state.game.lock().map_err(|e| e.to_string())?;
+    let game = game_lock.as_mut()
+        .ok_or_else(|| "Geen actief spel".to_string())?;
+    
+    game.timer_seconds = 0;
+    game.timer_running = false;
+    println!("[reset_timer] Timer reset");
+    
+    Ok(game.clone())
+}
+
+#[tauri::command]
+pub fn tick_timer(state: State<AppState>) -> Result<GameState, String> {
+    let mut game_lock = state.game.lock().map_err(|e| e.to_string())?;
+    let game = game_lock.as_mut()
+        .ok_or_else(|| "Geen actief spel".to_string())?;
+    
+    if game.timer_running {
+        game.timer_seconds += 1;
+    }
+    
+    Ok(game.clone())
+}
+
+#[tauri::command]
 pub fn toggle_writing(enabled: bool, state: State<AppState>) -> Result<GameState, String> {
     let mut game_lock = state.game.lock().map_err(|e| e.to_string())?;
     let game = game_lock.as_mut()

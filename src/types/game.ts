@@ -55,4 +55,6 @@ export interface GameState {
   video_mode_active: boolean;
   video_device_id: string | null;
   writing_enabled: boolean;
+  timer_seconds: number;
+  timer_running: boolean;
 }

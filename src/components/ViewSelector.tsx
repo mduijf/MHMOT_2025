@@ -15,7 +15,6 @@ interface ViewSelectorProps {
   onAddToPot: () => void;
   onPlaceBet: (playerId: string, amount: number) => void;
   onFold: (playerId: string) => void;
-  onAdvancePhase: () => void;
   onCompleteRound: (winnerId?: string) => void;
   onStartNextRound: () => void;
   onResetGame: () => void;
@@ -56,7 +55,6 @@ export function ViewSelector(props: ViewSelectorProps) {
             onPlaceBet={props.onPlaceBet}
             onRevealQuestion={props.onRevealQuestion}
             onPlayerFold={props.onFold}
-            onAdvancePhase={props.onAdvancePhase}
             onCompleteRound={props.onCompleteRound}
             onStartNextRound={props.onStartNextRound}
             onResetGame={props.onResetGame}

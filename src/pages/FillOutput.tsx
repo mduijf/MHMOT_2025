@@ -41,6 +41,11 @@ const ANSWER_BAR_BAR_HEIGHT = 80; // Hoogte van de bars
 // Spelernamen positie
 const PLAYER_NAME_Y = 560; // Y-positie voor de namen (boven de balances)
 const PLAYER_NAME_FONT_SIZE = 36;
+
+// Timer positie (rechtsboven)
+const TIMER_X = 1800;
+const TIMER_Y = 50;
+const TIMER_FONT_SIZE = 48;
 // ============================================================
 
 // Bepaal wie de eerste hand heeft op basis van rondenummer
@@ -70,6 +75,7 @@ function getFirstHandPlayer(roundNumber: number, players: any[]) {
 export function FillOutput() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [scale, setScale] = useState(1);
+  const [localTimerSeconds, setLocalTimerSeconds] = useState(0);
 
   useEffect(() => {
     const fetchState = async () => {
@@ -111,6 +117,24 @@ export function FillOutput() {
     return () => window.removeEventListener('resize', updateScale);
   }, []);
 
+  // Sync lokale timer met backend
+  useEffect(() => {
+    if (gameState) {
+      setLocalTimerSeconds(gameState.timer_seconds);
+    }
+  }, [gameState?.timer_seconds]);
+
+  // Lokale timer interval voor smooth updates
+  useEffect(() => {
+    if (gameState?.timer_running) {
+      const interval = setInterval(() => {
+        setLocalTimerSeconds(prev => prev + 1);
+      }, 1000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [gameState?.timer_running]);
+
   // Use default values if game not started yet
   const players = gameState?.players || [
     { id: 'player_0', name: 'Kandidaat 1', balance: 750, answers: [], has_folded: false, is_active: true, current_bet: 0 },
@@ -119,6 +143,12 @@ export function FillOutput() {
   ];
   const pot = gameState?.current_round?.pot || 0;
   const questionsCount = gameState?.current_round?.questions_count || 4;
+  
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   // Dynamische achtergrond op basis van aantal actieve spelers
   // Een speler is actief als: is_active=true EN balance > 0
@@ -254,6 +284,27 @@ export function FillOutput() {
           </div>
         );
       })}
+      
+      {/* Timer - rechtsboven, rode achtergrond, witte cijfers */}
+      <div style={{
+        position: 'absolute' as const,
+        top: `${TIMER_Y}px`,
+        left: `${TIMER_X}px`,
+        transform: 'translateX(-50%)',
+        background: '#DC143C', // Crimson rood
+        color: '#FFFFFF',
+        fontSize: `${TIMER_FONT_SIZE}px`,
+        fontWeight: 900,
+        padding: '10px 20px',
+        borderRadius: '8px',
+        fontFamily: FONT_FAMILY,
+        textShadow: '2px 2px 6px rgba(0,0,0,0.95)',
+        letterSpacing: '2px',
+        minWidth: '120px',
+        textAlign: 'center'
+      }}>
+        {formatTime(localTimerSeconds)}
+      </div>
       
       {/* Bedragen - alleen actieve spelers op hun oorspronkelijke posities */}
       {playerPositions.map(({ player, originalIndex }) => {
