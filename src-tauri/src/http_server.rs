@@ -52,19 +52,35 @@ pub async fn start_http_server(game_state: SharedGameState) {
         .await
         .expect("Failed to bind HTTP server");
     
-    println!("🚀 HTTP Server running on http://localhost:3001");
+    // Get local IP address for network access
+    let local_ip = get_local_ip().unwrap_or_else(|| "???".to_string());
+    
+    println!("🚀 HTTP Server running on port 3001");
+    println!("   🖥️  Lokaal: http://localhost:3001");
+    println!("   🌐 Netwerk: http://{}:3001", local_ip);
+    println!();
     println!("   📺 Graphics:");
-    println!("      - http://localhost:3001/fill");
-    println!("      - http://localhost:3001/key");
+    println!("      - http://localhost:3001/fill (of http://{}:3001/fill)", local_ip);
+    println!("      - http://localhost:3001/key (of http://{}:3001/key)", local_ip);
     println!("   👥 Player interfaces:");
-    println!("      - http://localhost:3001/player1");
-    println!("      - http://localhost:3001/player2");
-    println!("      - http://localhost:3001/player3");
+    println!("      - http://localhost:3001/player1 (of http://{}:3001/player1)", local_ip);
+    println!("      - http://localhost:3001/player2 (of http://{}:3001/player2)", local_ip);
+    println!("      - http://localhost:3001/player3 (of http://{}:3001/player3)", local_ip);
     println!("   📊 API: http://localhost:3001/api/gamestate");
     
     axum::serve(listener, app)
         .await
         .expect("Failed to start HTTP server");
+}
+
+fn get_local_ip() -> Option<String> {
+    use std::net::UdpSocket;
+    
+    // Trick: connect to a remote address to determine local IP
+    // We don't actually send data, just use it to get our local interface IP
+    let socket = UdpSocket::bind("0.0.0.0:0").ok()?;
+    socket.connect("8.8.8.8:80").ok()?;
+    socket.local_addr().ok().map(|addr| addr.ip().to_string())
 }
 
 fn get_assets_dir() -> PathBuf {
