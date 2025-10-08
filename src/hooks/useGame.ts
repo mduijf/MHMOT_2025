@@ -274,6 +274,22 @@ export function useGame() {
     }
   };
 
+  const updatePlayerName = async (playerId: string, newName: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const game = await invoke<GameState>('update_player_name', { playerId, newName });
+      setGameState(game);
+      return game;
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      setError(errorMsg);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     gameState,
     loading,
@@ -295,5 +311,6 @@ export function useGame() {
     revealQuestion,
     toggleVideoMode,
     setRoundNumber,
+    updatePlayerName,
   };
 }

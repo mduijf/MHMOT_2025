@@ -18,6 +18,39 @@ interface QuizmasterViewProps {
   onRevealQuestion: (questionNumber: number) => void;
   onToggleVideoMode: () => void;
   onSetRoundNumber: (roundNum: number) => Promise<any>;
+  onUpdatePlayerName: (playerId: string, newName: string) => Promise<any>;
+}
+
+// Bepaal wie de eerste hand heeft op basis van rondenummer
+function getFirstHandPlayer(roundNumber: number, players: any[]) {
+  // Basis patroon: (round - 1) % 3 = player index
+  // Ronde 1, 4, 7 -> player_0 (Kandidaat 1)
+  // Ronde 2, 5 -> player_1 (Kandidaat 2)
+  // Ronde 3, 6 -> player_2 (Kandidaat 3)
+  const basePlayerIndex = (roundNumber - 1) % 3;
+  
+  // Zoek de basis speler
+  const basePlayerId = `player_${basePlayerIndex}`;
+  const basePlayer = players.find(p => p.id === basePlayerId);
+  
+  // Als de basis speler actief is, gebruik die
+  if (basePlayer && basePlayer.is_active) {
+    return basePlayer;
+  }
+  
+  // Anders: zoek de VOLGENDE actieve speler in circulaire rotatie
+  // Start vanaf basePlayerIndex en loop door (0, 1, 2, 0, 1, 2, ...)
+  for (let i = 1; i <= 3; i++) {
+    const nextIndex = (basePlayerIndex + i) % 3;
+    const nextPlayerId = `player_${nextIndex}`;
+    const nextPlayer = players.find(p => p.id === nextPlayerId);
+    
+    if (nextPlayer && nextPlayer.is_active) {
+      return nextPlayer;
+    }
+  }
+  
+  return null; // Geen actieve spelers
 }
 
 export function QuizmasterView({
@@ -35,10 +68,14 @@ export function QuizmasterView({
   onRevealQuestion,
   onToggleVideoMode,
   onSetRoundNumber,
+  onUpdatePlayerName,
 }: QuizmasterViewProps) {
   const { players, current_round, round_number, is_finished, writing_enabled, video_mode_active } = gameState;
   const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
   const [editedName, setEditedName] = useState('');
+  
+  // Bepaal wie de eerste hand heeft
+  const firstHandPlayer = getFirstHandPlayer(round_number, players);
 
   const handleEditName = (playerId: string, currentName: string) => {
     setEditingPlayerId(playerId);
@@ -48,10 +85,9 @@ export function QuizmasterView({
   const handleSaveName = async (playerId: string) => {
     if (editedName.trim()) {
       try {
-        await invoke('update_player_name', { playerId, newName: editedName.trim() });
+        await onUpdatePlayerName(playerId, editedName.trim());
         setEditingPlayerId(null);
-        // Force refresh - window.location.reload() is a bit heavy but works
-        window.location.reload();
+        // State wordt automatisch geüpdatet via de hook
       } catch (err) {
         console.error('Failed to update player name:', err);
         alert('Kon naam niet bijwerken');
@@ -251,6 +287,18 @@ export function QuizmasterView({
             >
               ▶
             </button>
+          </div>
+        </div>
+
+        <div className="control-group">
+          <label>Eerste Hand</label>
+          <div className="first-hand-display" style={{
+            padding: '8px 16px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: '4px',
+            fontWeight: 'bold'
+          }}>
+            {firstHandPlayer ? firstHandPlayer.name : '-'}
           </div>
         </div>
 

@@ -28,6 +28,7 @@ function App() {
     revealQuestion,
     toggleVideoMode,
     setRoundNumber,
+    updatePlayerName,
   } = useGame();
 
   // Auto-start game met default namen bij eerste load
@@ -212,6 +213,7 @@ function App() {
         onRevealQuestion={revealQuestion}
         onToggleVideoMode={toggleVideoMode}
         onSetRoundNumber={setRoundNumber}
+        onUpdatePlayerName={updatePlayerName}
       />
     </>
   );

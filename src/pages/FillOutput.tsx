@@ -37,7 +37,35 @@ const ANSWER_BARS_START_Y = 720; // Pas deze waarde aan om de bars te verschuive
 const ANSWER_BAR_HEIGHT = 85;    // Verticale afstand tussen bars
 const ANSWER_BAR_WIDTH = 500;    // Breedte van de bars
 const ANSWER_BAR_BAR_HEIGHT = 80; // Hoogte van de bars
+
+// Spelernamen positie
+const PLAYER_NAME_Y = 560; // Y-positie voor de namen (boven de balances)
+const PLAYER_NAME_FONT_SIZE = 36;
 // ============================================================
+
+// Bepaal wie de eerste hand heeft op basis van rondenummer
+function getFirstHandPlayer(roundNumber: number, players: any[]) {
+  const basePlayerIndex = (roundNumber - 1) % 3;
+  const basePlayerId = `player_${basePlayerIndex}`;
+  const basePlayer = players.find(p => p.id === basePlayerId);
+  
+  if (basePlayer && basePlayer.is_active) {
+    return basePlayer;
+  }
+  
+  // Zoek de VOLGENDE actieve speler in circulaire rotatie
+  for (let i = 1; i <= 3; i++) {
+    const nextIndex = (basePlayerIndex + i) % 3;
+    const nextPlayerId = `player_${nextIndex}`;
+    const nextPlayer = players.find(p => p.id === nextPlayerId);
+    
+    if (nextPlayer && nextPlayer.is_active) {
+      return nextPlayer;
+    }
+  }
+  
+  return null;
+}
 
 export function FillOutput() {
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -120,6 +148,9 @@ export function FillOutput() {
   // Check of we in 2-speler modus moeten zijn
   const is2PlayerMode = roundNumber >= 5 && activeCount === 2;
   
+  // Bepaal wie de eerste hand heeft
+  const firstHandPlayer = getFirstHandPlayer(roundNumber, players);
+  
   let playerPositions: Array<{player: any, originalIndex: number, isActive: boolean}> = [];
   
   if (is2PlayerMode) {
@@ -176,6 +207,54 @@ export function FillOutput() {
           pointerEvents: 'none' 
         }}
       />
+      
+      {/* Spelernamen - alleen actieve spelers, eerste hand in geel */}
+      {playerPositions.map(({ player, originalIndex }) => {
+        // Gebruik dezelfde X-positie logica als voor balances
+        let x;
+        const y = PLAYER_NAME_Y;
+        
+        if (is2PlayerMode) {
+          if (originalIndex === 2) {
+            x = PLAYER_2_X_2P;
+          } else if (originalIndex === 3) {
+            x = PLAYER_3_X_2P;
+          } else {
+            x = PLAYER_2_X_2P;
+          }
+        } else {
+          if (originalIndex === 1) {
+            x = PLAYER_1_X;
+          } else if (originalIndex === 2) {
+            x = PLAYER_2_X;
+          } else {
+            x = PLAYER_3_X;
+          }
+        }
+        
+        // Check of dit de eerste hand speler is
+        const isFirstHand = firstHandPlayer && player.id === firstHandPlayer.id;
+        
+        const nameStyle = {
+          position: 'absolute' as const,
+          top: `${y}px`,
+          left: `${x}px`,
+          transform: 'translateX(-50%)',
+          fontSize: `${PLAYER_NAME_FONT_SIZE}px`,
+          letterSpacing: '1px',
+          color: isFirstHand ? '#FFD700' : '#FFFFFF', // Geel voor eerste hand, anders wit
+          fontWeight: 900,
+          textShadow: '2px 2px 6px rgba(0,0,0,0.95)',
+          fontFamily: FONT_FAMILY
+        };
+        
+        return (
+          <div key={`name-${player.id}`} style={nameStyle}>
+            {player.name}
+          </div>
+        );
+      })}
+      
       {/* Bedragen - alleen actieve spelers op hun oorspronkelijke posities */}
       {playerPositions.map(({ player, originalIndex }) => {
         // Gebruik de juiste X-positie afhankelijk van 2-speler of 3-speler modus
