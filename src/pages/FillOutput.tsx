@@ -31,7 +31,6 @@ const ANSWER_BAR_BAR_HEIGHT = 80; // Hoogte van de bars
 
 export function FillOutput() {
   const [gameState, setGameState] = useState<GameState | null>(null);
-  const [timer, setTimer] = useState(0);
   const [scale, setScale] = useState(1);
 
   useEffect(() => {
@@ -81,12 +80,6 @@ export function FillOutput() {
   ];
   const pot = gameState?.current_round?.pot || 0;
   const questionsCount = gameState?.current_round?.questions_count || 4;
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
 
   // Dynamische achtergrond op basis van aantal actieve spelers
   // Een speler is actief als: is_active=true EN balance > 0
@@ -188,7 +181,6 @@ export function FillOutput() {
           const questionNum = qIndex + 1;
           const isRevealed = gameState?.current_round?.revealed_questions.includes(questionNum) || false;
           let barColor = 'transparent';
-          let textColor = '#FFFFFF';
           
           // Alleen kleuren tonen als vraag is ge-revealed EN antwoord is beoordeeld
           if (isRevealed && answer && answer.is_correct !== null) {

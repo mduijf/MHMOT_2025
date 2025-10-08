@@ -66,22 +66,20 @@ export function KeyOutput() {
   }
   
   // Map players naar graphics posities (gebruik player ID om positie te bepalen)
-  const playerPositions = players.map((player) => {
-    // Haal het nummer uit het player ID
-    // Formaat: "player_0" -> 0, of voor mock data: "1" -> 1
-    let idNum = 0;
-    if (player.id.includes('_')) {
-      idNum = parseInt(player.id.split('_')[1]);
-    } else {
-      // Mock data gebruikt gewoon "1", "2", "3"
-      idNum = parseInt(player.id) - 1; // "1" -> 0, "2" -> 1, "3" -> 2
-    }
-    return {
-      player,
-      originalIndex: idNum + 1, // 0->1, 1->2, 2->3
-      isActive: player.is_active && player.balance > 0
-    };
-  }).filter(p => p.isActive);
+  // Momenteel niet gebruikt, maar kan later gebruikt worden voor player-specifieke rendering
+  // const playerPositions = players.map((player) => {
+  //   let idNum = 0;
+  //   if (player.id.includes('_')) {
+  //     idNum = parseInt(player.id.split('_')[1]);
+  //   } else {
+  //     idNum = parseInt(player.id) - 1;
+  //   }
+  //   return {
+  //     player,
+  //     originalIndex: idNum + 1,
+  //     isActive: player.is_active && player.balance > 0
+  //   };
+  // }).filter(p => p.isActive);
 
   return (
     <div className="graphics-container">

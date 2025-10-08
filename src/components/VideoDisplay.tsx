@@ -7,9 +7,7 @@ interface VideoDisplayProps {
 
 export function VideoDisplay({ deviceId: initialDeviceId }: VideoDisplayProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | undefined>(initialDeviceId);
-  const [showDeviceSelector, setShowDeviceSelector] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
 
   // Haal beschikbare video devices op
@@ -21,7 +19,6 @@ export function VideoDisplay({ deviceId: initialDeviceId }: VideoDisplayProps) {
         
         const allDevices = await navigator.mediaDevices.enumerateDevices();
         const videoDevices = allDevices.filter(device => device.kind === 'videoinput');
-        setDevices(videoDevices);
         
         // Als er geen device geselecteerd is, gebruik de eerste
         if (!selectedDeviceId && videoDevices.length > 0) {
@@ -33,7 +30,7 @@ export function VideoDisplay({ deviceId: initialDeviceId }: VideoDisplayProps) {
     };
 
     getDevices();
-  }, []);
+  }, [selectedDeviceId]);
 
   // Start video stream met geselecteerd device
   useEffect(() => {
@@ -80,12 +77,7 @@ export function VideoDisplay({ deviceId: initialDeviceId }: VideoDisplayProps) {
         currentStream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [selectedDeviceId]);
-
-  const handleDeviceSelect = (deviceId: string) => {
-    setSelectedDeviceId(deviceId);
-    setShowDeviceSelector(false);
-  };
+  }, [selectedDeviceId, stream]);
 
   return (
     <div className="video-display-container">
