@@ -26,7 +26,7 @@ pub fn run() {
                 http_server::start_http_server(http_state).await;
             });
             
-            // In production, redirect the main window to HTTP server
+            // In production, redirect the main window to HTTP server via JavaScript
             #[cfg(not(dev))]
             {
                 use tauri::Manager;
@@ -34,9 +34,9 @@ pub fn run() {
                 // Give HTTP server time to start
                 std::thread::sleep(std::time::Duration::from_secs(1));
                 
-                // Navigate the existing window to localhost:3001
+                // Redirect to HTTP server using JavaScript eval
                 if let Some(window) = app.get_webview_window("main") {
-                    let _ = window.navigate(tauri::WebviewUrl::External("http://localhost:3001".parse().unwrap()));
+                    let _ = window.eval("window.location.href = 'http://localhost:3001'");
                 }
             }
             
