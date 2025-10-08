@@ -7,7 +7,10 @@ use axum::{
 use chrono;
 use serde::Deserialize;
 use std::sync::{Arc, Mutex};
+use std::path::PathBuf;
 use tower_http::cors::{Any, CorsLayer};
+use tower_http::services::ServeDir;
+use tower::ServiceBuilder;
 
 use crate::game::GameState;
 
@@ -26,28 +29,75 @@ pub async fn start_http_server(game_state: SharedGameState) {
         .allow_origin(Any)
         .allow_headers(Any);
 
+    // Determine the assets directory
+    let assets_dir = get_assets_dir();
+    
     let app = Router::new()
+        // API routes
         .route("/api/gamestate", get(get_game_state))
         .route("/api/update_answer", post(update_answer))
-        .layer(cors)
-        .with_state(game_state);
+        .layer(cors.clone())
+        .with_state(game_state.clone())
+        // Serve static files from dist directory
+        .nest_service("/", 
+            ServiceBuilder::new()
+                .layer(cors)
+                .service(ServeDir::new(&assets_dir).fallback(
+                    ServeDir::new(&assets_dir)
+                        .append_index_html_on_directories(true)
+                ))
+        );
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3001")
         .await
         .expect("Failed to bind HTTP server");
     
-    println!("🚀 HTTP API server running on http://localhost:3001");
-    println!("   Graphics accessible at:");
-    println!("   - http://localhost:1420/fill (Vite dev server)");
-    println!("   - http://localhost:1420/key (Vite dev server)");
-    println!("   Player interfaces:");
-    println!("   - http://localhost:1420/player1");
-    println!("   - http://localhost:1420/player2");
-    println!("   - http://localhost:1420/player3");
+    println!("🚀 HTTP Server running on http://localhost:3001");
+    println!("   📺 Graphics:");
+    println!("      - http://localhost:3001/fill");
+    println!("      - http://localhost:3001/key");
+    println!("   👥 Player interfaces:");
+    println!("      - http://localhost:3001/player1");
+    println!("      - http://localhost:3001/player2");
+    println!("      - http://localhost:3001/player3");
+    println!("   📊 API: http://localhost:3001/api/gamestate");
     
     axum::serve(listener, app)
         .await
         .expect("Failed to start HTTP server");
+}
+
+fn get_assets_dir() -> PathBuf {
+    // In development: use ../dist
+    let dev_path = PathBuf::from("../dist");
+    
+    if dev_path.exists() {
+        println!("   📁 Serving assets from: ../dist (development)");
+        return dev_path;
+    }
+    
+    // In production: try to find bundled resources
+    // The resources are bundled in the app's resource directory
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            // macOS: Resources are in ../Resources relative to the binary
+            let macos_resources = exe_dir.join("../Resources/dist");
+            if macos_resources.exists() {
+                println!("   📁 Serving assets from: {:?} (macOS bundle)", macos_resources);
+                return macos_resources;
+            }
+            
+            // Try relative to exe
+            let local_dist = exe_dir.join("dist");
+            if local_dist.exists() {
+                println!("   📁 Serving assets from: {:?} (local)", local_dist);
+                return local_dist;
+            }
+        }
+    }
+    
+    println!("   ⚠️  Assets directory not found, using fallback: ../dist");
+    dev_path
 }
 
 async fn get_game_state(

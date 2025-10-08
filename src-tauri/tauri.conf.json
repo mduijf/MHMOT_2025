@@ -39,6 +39,9 @@
     "copyright": "Copyright © 2025 Yellowspot BV",
     "category": "Game",
     "shortDescription": "Nederlandse kennisquiz met poker-elementen",
-    "longDescription": "Met het Mes op Tafel is een Nederlandse kennisquiz gecombineerd met poker-elementen. Spelers beantwoorden vragen en zetten strategisch in op hun antwoorden."
+    "longDescription": "Met het Mes op Tafel is een Nederlandse kennisquiz gecombineerd met poker-elementen. Spelers beantwoorden vragen en zetten strategisch in op hun antwoorden.",
+    "resources": [
+      "../dist"
+    ]
   }
 }

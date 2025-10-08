@@ -21,7 +21,8 @@ chrono = { version = "0.4", features = ["serde"] }
 serialport = "4.3"
 tokio = { version = "1", features = ["full"] }
 axum = "0.7"
-tower-http = { version = "0.5", features = ["cors"] }
+tower-http = { version = "0.5", features = ["cors", "fs"] }
+tower = "0.4"
 reqwest = { version = "0.11", features = ["json"] }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
