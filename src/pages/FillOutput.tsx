@@ -99,23 +99,32 @@ export function FillOutput() {
   }
   // Voor toekomstig gebruik: BACK-SELECT.png voor "kijkers thuis" mode
   
-  // Map players naar graphics posities (gebruik player ID om positie te bepalen)
-  const playerPositions = players.map((player) => {
-    // Haal het nummer uit het player ID
-    // Formaat: "player_0" -> 0, of voor mock data: "1" -> 1
-    let idNum = 0;
-    if (player.id.includes('_')) {
-      idNum = parseInt(player.id.split('_')[1]);
+  // Map players naar graphics posities
+  const roundNumber = gameState?.round_number || 1;
+  
+  const playerPositions = activePlayers.map((player, index) => {
+    let graphicsPosition: number;
+    
+    if (roundNumber >= 5 && activePlayers.length === 2) {
+      // Rondes 5-7 met 2 spelers: ALTIJD op posities 2 & 3 (midden & rechts)
+      graphicsPosition = index === 0 ? 2 : 3;
     } else {
-      // Mock data gebruikt gewoon "1", "2", "3"
-      idNum = parseInt(player.id) - 1; // "1" -> 0, "2" -> 1, "3" -> 2
+      // Rondes 1-4: gebruik originele player ID
+      let idNum = 0;
+      if (player.id.includes('_')) {
+        idNum = parseInt(player.id.split('_')[1]);
+      } else {
+        idNum = parseInt(player.id) - 1;
+      }
+      graphicsPosition = idNum + 1; // 0->1, 1->2, 2->3
     }
+    
     return {
       player,
-      originalIndex: idNum + 1, // 0->1, 1->2, 2->3
-      isActive: player.is_active && player.balance > 0
+      originalIndex: graphicsPosition,
+      isActive: true
     };
-  }).filter(p => p.isActive);
+  });
   
   return (
     <div className="graphics-container">
