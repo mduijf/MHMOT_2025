@@ -18,6 +18,7 @@ interface QuizmasterViewProps {
   onToggleVideoMode: () => void;
   onSetRoundNumber: (roundNum: number) => Promise<any>;
   onUpdatePlayerName: (playerId: string, newName: string) => Promise<any>;
+  onUndoLastAction: () => Promise<any>;
 }
 
 // Helper: verkrijg kandidaatnummer op basis van player.id
@@ -77,6 +78,7 @@ export function QuizmasterView({
   onToggleVideoMode,
   onSetRoundNumber,
   onUpdatePlayerName,
+  onUndoLastAction,
 }: QuizmasterViewProps) {
   const { players, current_round, round_number, is_finished, writing_enabled, video_mode_active, timer_seconds, timer_running } = gameState;
   const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
@@ -235,7 +237,7 @@ export function QuizmasterView({
 
   const handleUndo = async () => {
     try {
-      await invoke('undo_last_action');
+      await onUndoLastAction();
       setShowUndo(false);
       
       // Clear de undo timer

@@ -23,6 +23,7 @@ interface ViewSelectorProps {
   onToggleVideoMode: () => void;
   onSetRoundNumber: (roundNum: number) => Promise<any>;
   onUpdatePlayerName: (playerId: string, newName: string) => Promise<any>;
+  onUndoLastAction: () => Promise<any>;
 }
 
 type ViewType = 'quizmaster' | 'player1' | 'player2' | 'player3' | 'settings' | 'graphics';
@@ -62,6 +63,7 @@ export function ViewSelector(props: ViewSelectorProps) {
             onToggleVideoMode={props.onToggleVideoMode}
             onSetRoundNumber={props.onSetRoundNumber}
             onUpdatePlayerName={props.onUpdatePlayerName}
+            onUndoLastAction={props.onUndoLastAction}
           />
         );
       

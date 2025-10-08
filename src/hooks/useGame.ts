@@ -274,6 +274,22 @@ export function useGame() {
     }
   };
 
+  const undoLastAction = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const game = await invoke<GameState>('undo_last_action');
+      setGameState(game);
+      return game;
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      setError(errorMsg);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     gameState,
     loading,
@@ -295,5 +311,6 @@ export function useGame() {
     toggleVideoMode,
     setRoundNumber,
     updatePlayerName,
+    undoLastAction,
   };
 }
