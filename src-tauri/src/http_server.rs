@@ -1,6 +1,7 @@
 use axum::{
     extract::State,
-    http::Method,
+    http::{Method, StatusCode},
+    response::{Html, IntoResponse, Response},
     routing::{get, post},
     Json, Router,
 };
@@ -10,7 +11,6 @@ use std::sync::{Arc, Mutex};
 use std::path::PathBuf;
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::ServeDir;
-use tower::ServiceBuilder;
 
 use crate::game::GameState;
 
@@ -21,6 +21,17 @@ struct UpdateAnswerRequest {
     player_id: String,
     question_number: i32,
     image_data: String,
+}
+
+// SPA fallback handler - serves index.html for all non-API routes
+async fn spa_fallback() -> Response {
+    let assets_dir = get_assets_dir();
+    let index_path = assets_dir.join("index.html");
+    
+    match tokio::fs::read_to_string(&index_path).await {
+        Ok(content) => Html(content).into_response(),
+        Err(_) => (StatusCode::NOT_FOUND, "index.html not found").into_response(),
+    }
 }
 
 pub async fn start_http_server(game_state: SharedGameState) {
@@ -36,17 +47,14 @@ pub async fn start_http_server(game_state: SharedGameState) {
         // API routes
         .route("/api/gamestate", get(get_game_state))
         .route("/api/update_answer", post(update_answer))
-        .layer(cors.clone())
         .with_state(game_state.clone())
+        .layer(cors.clone())
         // Serve static files from dist directory
-        .nest_service("/", 
-            ServiceBuilder::new()
-                .layer(cors)
-                .service(ServeDir::new(&assets_dir).fallback(
-                    ServeDir::new(&assets_dir)
-                        .append_index_html_on_directories(true)
-                ))
-        );
+        .nest_service("/assets", ServeDir::new(assets_dir.join("assets")))
+        .nest_service("/graphics_info", ServeDir::new(assets_dir.join("graphics_info")))
+        // SPA fallback for all other routes
+        .fallback(spa_fallback)
+        .layer(cors);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3001")
         .await
@@ -96,6 +104,13 @@ fn get_assets_dir() -> PathBuf {
     // The resources are bundled in the app's resource directory
     if let Ok(exe_path) = std::env::current_exe() {
         if let Some(exe_dir) = exe_path.parent() {
+            // Tauri dev build: check _up_/dist
+            let tauri_dev = exe_dir.join("_up_/dist");
+            if tauri_dev.exists() {
+                println!("   📁 Serving assets from: {:?} (Tauri dev)", tauri_dev);
+                return tauri_dev;
+            }
+            
             // macOS: Resources are in ../Resources relative to the binary
             let macos_resources = exe_dir.join("../Resources/dist");
             if macos_resources.exists() {
