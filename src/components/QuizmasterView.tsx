@@ -451,25 +451,31 @@ export function QuizmasterView({
           </div>
         </div>
 
-        {/* Extra Controls - Compacter */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <label style={{ fontSize: '11px', color: '#fff', opacity: 0.8, marginBottom: '2px' }}>Controls</label>
-          <div style={{ display: 'flex', gap: '4px' }}>
-            <button onClick={onToggleVideoMode} title="Schakel externe video weergave" style={{ padding: '4px 8px', fontSize: '11px', background: gameState.video_mode_active ? '#ff9800' : '#546e7a', border: 'none', borderRadius: '4px', color: 'white', cursor: 'pointer' }}>
-              {gameState.video_mode_active ? '📹 AAN' : '📹'}
-            </button>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 6px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '3px', cursor: 'pointer', fontSize: '10px', color: '#fff' }}>
-              <input type="checkbox" checked={writing_enabled} onChange={async (e) => { try { await invoke('toggle_writing', { enabled: e.target.checked }); } catch (err) { console.error('Error toggling writing:', err); } }} disabled={video_mode_active} style={{ cursor: 'pointer' }} />
-              ✍️ {video_mode_active ? '❌' : '✓'}
-            </label>
+        {/* Extra Controls - Veilig gescheiden */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <label style={{ fontSize: '11px', color: '#fff', opacity: 0.8, marginBottom: '2px' }}>Quick Controls</label>
+            <div style={{ display: 'flex', gap: '4px' }}>
+              <button onClick={onToggleVideoMode} title="Schakel externe video weergave" style={{ padding: '4px 8px', fontSize: '11px', background: gameState.video_mode_active ? '#ff9800' : '#546e7a', border: 'none', borderRadius: '4px', color: 'white', cursor: 'pointer' }}>
+                {gameState.video_mode_active ? '📹 AAN' : '📹'}
+              </button>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 6px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '3px', cursor: 'pointer', fontSize: '10px', color: '#fff' }}>
+                <input type="checkbox" checked={writing_enabled} onChange={async (e) => { try { await invoke('toggle_writing', { enabled: e.target.checked }); } catch (err) { console.error('Error toggling writing:', err); } }} disabled={video_mode_active} style={{ cursor: 'pointer' }} />
+                ✍️ {video_mode_active ? '❌' : '✓'}
+              </label>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: '4px' }}>
-            <button onClick={onStartNextRound} title="Wis alle schermen en start nieuwe ronde" style={{ padding: '4px 8px', fontSize: '11px', background: '#546e7a', border: 'none', borderRadius: '4px', color: 'white', cursor: 'pointer' }}>
-              🗑️ Schoon
-            </button>
-            <button onClick={() => { onResetGame(); }} title="Reset naar Ronde 1" style={{ padding: '4px 8px', fontSize: '11px', background: '#d32f2f', border: 'none', borderRadius: '4px', color: 'white', cursor: 'pointer' }}>
-              🔄 Reset
-            </button>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', borderTop: '1px solid rgba(255,0,0,0.3)', paddingTop: '8px' }}>
+            <label style={{ fontSize: '10px', color: '#ff6b6b', opacity: 0.9, marginBottom: '2px' }}>⚠️ Destructief</label>
+            <div style={{ display: 'flex', gap: '4px' }}>
+              <button onClick={onStartNextRound} title="Wis alle schermen en start nieuwe ronde" style={{ padding: '4px 8px', fontSize: '11px', background: '#e67e22', border: '1px solid #d35400', borderRadius: '4px', color: 'white', cursor: 'pointer' }}>
+                🗑️ Schoon
+              </button>
+              <button onClick={() => { onResetGame(); }} title="Reset naar Ronde 1" style={{ padding: '4px 8px', fontSize: '11px', background: '#c0392b', border: '1px solid #a93226', borderRadius: '4px', color: 'white', cursor: 'pointer' }}>
+                🔄 Reset
+              </button>
+            </div>
           </div>
         </div>
 
