@@ -1,6 +1,6 @@
 [package]
 name = "met-het-mes-op-tafel"
-version = "1.4.0"
+version = "1.4.1"
 description = "Met het Mes op Tafel - Nederlandse kennisquiz met poker-elementen"
 authors = ["Yellowspot BV"]
 edition = "2021"
