@@ -1,0 +1,153 @@
+.update-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  max-width: 450px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(500px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.update-content {
+  padding: 20px;
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+}
+
+.update-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.update-info {
+  flex: 1;
+}
+
+.update-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.update-info p {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  opacity: 0.95;
+}
+
+.release-notes {
+  margin-top: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.release-notes summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px;
+  user-select: none;
+}
+
+.release-notes summary:hover {
+  opacity: 0.8;
+}
+
+.release-notes-content {
+  margin-top: 8px;
+  padding: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  max-height: 150px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.update-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.update-actions button {
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-download {
+  background: white;
+  color: #667eea;
+}
+
+.btn-download:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-dismiss {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.btn-dismiss:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.update-checking {
+  padding: 8px 20px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 12px;
+  text-align: center;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+/* Responsive voor kleinere schermen */
+@media (max-width: 600px) {
+  .update-notification {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+  
+  .update-content {
+    flex-direction: column;
+  }
+  
+  .update-actions {
+    flex-direction: row;
+    width: 100%;
+  }
+  
+  .update-actions button {
+    flex: 1;
+  }
+}
+

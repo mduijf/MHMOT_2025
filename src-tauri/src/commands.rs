@@ -413,3 +413,8 @@ pub fn toggle_writing(enabled: bool, state: State<AppState>) -> Result<GameState
     
     Ok(game.clone())
 }
+
+#[tauri::command]
+pub async fn check_for_updates() -> Result<crate::updater::UpdateInfo, String> {
+    crate::updater::check_for_updates().await
+}

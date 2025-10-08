@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { GameSetup } from './components/GameSetup';
 import { ViewSelector } from './components/ViewSelector';
+import { UpdateNotification } from './components/UpdateNotification';
 import { useGame } from './hooks/useGame';
 import './App.css';
 
@@ -180,22 +181,25 @@ function App() {
   };
 
   return (
-    <ViewSelector
-      gameState={gameState}
-      onUpdateAnswer={handleUpdateAnswer}
-      onApproveAnswer={handleApproveAnswer}
-      onCollectBets={handleCollectBets}
-      onAddToPot={handleAddToPot}
-      onPlaceBet={handlePlaceBet}
-      onFold={handleFold}
-      onAdvancePhase={handleAdvancePhase}
-      onCompleteRound={handleCompleteRound}
-      onStartNextRound={handleStartNextRound}
-      onResetGame={handleResetGame}
-      onTogglePlayerActive={handleTogglePlayerActive}
-      onRevealQuestion={revealQuestion}
-      onToggleVideoMode={toggleVideoMode}
-    />
+    <>
+      <UpdateNotification />
+      <ViewSelector
+        gameState={gameState}
+        onUpdateAnswer={handleUpdateAnswer}
+        onApproveAnswer={handleApproveAnswer}
+        onCollectBets={handleCollectBets}
+        onAddToPot={handleAddToPot}
+        onPlaceBet={handlePlaceBet}
+        onFold={handleFold}
+        onAdvancePhase={handleAdvancePhase}
+        onCompleteRound={handleCompleteRound}
+        onStartNextRound={handleStartNextRound}
+        onResetGame={handleResetGame}
+        onTogglePlayerActive={handleTogglePlayerActive}
+        onRevealQuestion={revealQuestion}
+        onToggleVideoMode={toggleVideoMode}
+      />
+    </>
   );
 }
 

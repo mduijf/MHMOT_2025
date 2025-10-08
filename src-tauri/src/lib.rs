@@ -2,6 +2,7 @@ mod game;
 mod commands;
 mod display;
 mod http_server;
+mod updater;
 
 use std::sync::{Arc, Mutex};
 use commands::AppState;
@@ -53,6 +54,7 @@ pub fn run() {
             commands::update_display_values,
             commands::test_displays,
             commands::clear_displays,
+            commands::check_for_updates,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
