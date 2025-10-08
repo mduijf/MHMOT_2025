@@ -279,6 +279,16 @@ export function useGame() {
       setLoading(true);
       setError(null);
       const game = await invoke<GameState>('undo_last_action');
+      
+      // Debug: log hoeveel antwoorden we terugkrijgen
+      console.log('[UNDO Frontend] Received game state:');
+      game.players.forEach(player => {
+        console.log(`[UNDO Frontend]   ${player.name}: ${player.answers.length} answers`);
+        player.answers.forEach(answer => {
+          console.log(`[UNDO Frontend]     Q${answer.question_number}: ${answer.image_data?.length || 0} chars`);
+        });
+      });
+      
       setGameState(game);
       return game;
     } catch (err) {
