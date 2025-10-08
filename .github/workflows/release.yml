@@ -52,7 +52,7 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: 'Met het Mes op Tafel ${{ github.ref_name }}'
           releaseBody: 'Zie de assets hieronder voor de installers.'
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
 
