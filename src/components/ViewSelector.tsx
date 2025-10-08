@@ -4,6 +4,7 @@ import { QuizmasterView } from './QuizmasterView';
 import { AnswerInput } from './AnswerInput';
 import { DisplaySettings } from './DisplaySettings';
 import { GraphicsController } from './GraphicsController';
+import { ServerConfig } from './ServerConfig';
 import './ViewSelector.css';
 
 interface ViewSelectorProps {
@@ -85,6 +86,7 @@ export function ViewSelector(props: ViewSelectorProps) {
   
   return (
     <div className={`view-selector-container ${isPlayerView ? 'player-view' : ''}`}>
+      <ServerConfig />
       <div className="view-tabs">
         <button
           className={`tab ${currentView === 'quizmaster' ? 'active' : ''}`}

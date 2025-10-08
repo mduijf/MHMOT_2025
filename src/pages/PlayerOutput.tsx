@@ -3,7 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { GameState } from '../types/game';
 import { AnswerInput } from '../components/AnswerInput';
 import { VideoDisplay } from '../components/VideoDisplay';
-import { ServerConfig, getServerUrl } from '../components/ServerConfig';
+import { getServerUrl } from '../components/ServerConfig';
 
 interface PlayerOutputProps {
   playerNumber: 1 | 2 | 3;
@@ -87,23 +87,15 @@ export function PlayerOutput({ playerNumber }: PlayerOutputProps) {
   
   // Als video mode actief is, toon de video display
   if (gameState.video_mode_active) {
-    return (
-      <>
-        <ServerConfig />
-        <VideoDisplay deviceId={gameState.video_device_id || undefined} />
-      </>
-    );
+    return <VideoDisplay deviceId={gameState.video_device_id || undefined} />;
   }
   
   return (
-    <>
-      <ServerConfig />
-      <AnswerInput
-        gameState={gameState}
-        playerId={playerId}
-        onUpdateAnswer={handleUpdateAnswer}
-      />
-    </>
+    <AnswerInput
+      gameState={gameState}
+      playerId={playerId}
+      onUpdateAnswer={handleUpdateAnswer}
+    />
   );
 }
 
