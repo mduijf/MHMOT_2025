@@ -183,16 +183,16 @@ export function useGame() {
     }
   };
 
-  // Auto-refresh voor live updates
+  // Auto-refresh voor live updates - maar NIET tijdens loading
   useEffect(() => {
-    if (gameState && !gameState.is_finished) {
+    if (gameState && !gameState.is_finished && !loading) {
       const interval = setInterval(() => {
         refreshGameState().catch(console.error);
       }, 2000); // Elke 2 seconden refreshen
 
       return () => clearInterval(interval);
     }
-  }, [gameState?.is_finished]);
+  }, [gameState?.is_finished, loading]);
 
   const togglePlayerActive = async (playerId: string, isActive: boolean) => {
     try {
