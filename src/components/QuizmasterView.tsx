@@ -17,6 +17,7 @@ interface QuizmasterViewProps {
   onTogglePlayerActive: (playerId: string, isActive: boolean) => void;
   onRevealQuestion: (questionNumber: number) => void;
   onToggleVideoMode: () => void;
+  onSetRoundNumber: (roundNum: number) => Promise<any>;
 }
 
 export function QuizmasterView({
@@ -33,6 +34,7 @@ export function QuizmasterView({
   onTogglePlayerActive,
   onRevealQuestion,
   onToggleVideoMode,
+  onSetRoundNumber,
 }: QuizmasterViewProps) {
   const { players, current_round, round_number, is_finished, writing_enabled, video_mode_active } = gameState;
   const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
@@ -61,6 +63,17 @@ export function QuizmasterView({
   const handleCancelEdit = () => {
     setEditingPlayerId(null);
     setEditedName('');
+  };
+
+  const handleChangeRound = async (newRound: number) => {
+    if (newRound < 1 || newRound > 7) return;
+    try {
+      await onSetRoundNumber(newRound);
+      // State wordt automatisch geüpdatet via de hook
+    } catch (err) {
+      console.error('Failed to change round:', err);
+      alert('Kon rondenummer niet wijzigen');
+    }
   };
 
   if (is_finished) {
@@ -206,7 +219,39 @@ export function QuizmasterView({
       <div className="top-control-bar">
         <div className="control-group">
           <label>Ronde</label>
-          <div className="round-display">{round_number} / 7</div>
+          <div className="round-display" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button 
+              onClick={() => handleChangeRound(round_number - 1)}
+              disabled={round_number <= 1}
+              style={{ 
+                background: 'none', 
+                border: 'none', 
+                color: round_number <= 1 ? '#666' : '#fff', 
+                fontSize: '20px', 
+                cursor: round_number <= 1 ? 'not-allowed' : 'pointer',
+                padding: '0 5px'
+              }}
+              title="Vorige ronde"
+            >
+              ◀
+            </button>
+            <span>{round_number} / 7</span>
+            <button 
+              onClick={() => handleChangeRound(round_number + 1)}
+              disabled={round_number >= 7}
+              style={{ 
+                background: 'none', 
+                border: 'none', 
+                color: round_number >= 7 ? '#666' : '#fff', 
+                fontSize: '20px', 
+                cursor: round_number >= 7 ? 'not-allowed' : 'pointer',
+                padding: '0 5px'
+              }}
+              title="Volgende ronde"
+            >
+              ▶
+            </button>
+          </div>
         </div>
 
         <div className="control-group">
@@ -425,15 +470,17 @@ export function QuizmasterView({
                   PASS
                 </button>
                 
-                {/* Afvaller Checkbox */}
-                <label className="afvaller-checkbox" title="Markeer als afvaller (verschijnt niet meer in graphics)">
-                  <input
-                    type="checkbox"
-                    checked={!player.is_active}
-                    onChange={(e) => onTogglePlayerActive(player.id, !e.target.checked)}
-                  />
-                  <span>Afvaller</span>
-                </label>
+                {/* Afvaller Checkbox - alleen na ronde 4 */}
+                {round_number > 4 && (
+                  <label className="afvaller-checkbox" title="Markeer als afvaller (verschijnt niet meer in graphics)">
+                    <input
+                      type="checkbox"
+                      checked={!player.is_active}
+                      onChange={(e) => onTogglePlayerActive(player.id, !e.target.checked)}
+                    />
+                    <span>Afvaller</span>
+                  </label>
+                )}
                 {onPlaceBet && phase !== BettingPhase.Initial && phase !== BettingPhase.Completed ? (
                   <button 
                     className={`status-btn mee ${!player.has_folded && player.current_bet === getHighestBet() ? 'active' : ''}`}

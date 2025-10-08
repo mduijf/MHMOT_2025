@@ -259,6 +259,37 @@ pub fn start_next_round(state: State<AppState>) -> Result<GameState, String> {
 }
 
 #[tauri::command]
+pub fn set_round_number(round_num: i32, state: State<AppState>) -> Result<GameState, String> {
+    let mut game_lock = state.game.lock().map_err(|e| e.to_string())?;
+    let game = game_lock.as_mut()
+        .ok_or_else(|| "Geen actief spel".to_string())?;
+    
+    if round_num < 1 || round_num > 7 {
+        return Err("Rondenummer moet tussen 1 en 7 zijn".to_string());
+    }
+    
+    // Update round number
+    game.round_number = round_num;
+    
+    // Als er een actieve ronde is, update deze ook
+    if let Some(ref mut current_round) = game.current_round {
+        current_round.round_number = round_num;
+        
+        // Update minimale inzet op basis van rondenummer
+        current_round.min_bet = match round_num {
+            1 => 10,
+            2 => 20,
+            3 => 40,
+            _ => 80,
+        };
+    }
+    
+    println!("[set_round_number] Round number set to: {}", round_num);
+    
+    Ok(game.clone())
+}
+
+#[tauri::command]
 pub fn reset_game(state: State<AppState>) -> Result<GameState, String> {
     println!("[reset_game] Starting game reset...");
     let mut game_lock = state.game.lock().map_err(|e| e.to_string())?;
@@ -344,6 +375,25 @@ pub fn toggle_player_active(player_id: String, is_active: bool, state: State<App
     let mut game_lock = state.game.lock().map_err(|e| e.to_string())?;
     let game = game_lock.as_mut()
         .ok_or_else(|| "Geen actief spel".to_string())?;
+    
+    // Als we een speler willen elimineren (is_active = false), controleer eerst of er al een geëlimineerde speler is
+    if !is_active && game.round_number > 4 {
+        // Tel hoeveel spelers al geëlimineerd zijn (handmatig, niet door balance)
+        let manually_eliminated_count = game.players.iter()
+            .filter(|p| !p.is_active && p.balance > 0) // Geëlimineerd maar nog geld
+            .count();
+        
+        // Als er al een speler handmatig is geëlimineerd, activeer die eerst
+        if manually_eliminated_count >= 1 {
+            for player in game.players.iter_mut() {
+                if !player.is_active && player.balance > 0 && player.id != player_id {
+                    player.is_active = true;
+                    println!("[toggle_player_active] Re-activating player {} to allow only one elimination", player.name);
+                    break;
+                }
+            }
+        }
+    }
     
     if let Some(player) = game.players.iter_mut().find(|p| p.id == player_id) {
         player.is_active = is_active;

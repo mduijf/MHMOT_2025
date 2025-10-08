@@ -9,13 +9,25 @@ import '../styles/fill-output.css';
 // Graphics overlay is 410px hoog en staat onderaan (bottom: 0)
 // Y-posities zijn vanaf de BOVENKANT van de 1080px canvas
 // ============================================================
+
+// 3-SPELER MODUS (breed)
 const PLAYER_1_X = 250;
-const PLAYER_1_Y = 668;  // Was 295, nu onderaan: 1080 - 115
 const PLAYER_2_X = 800;
-const PLAYER_2_Y = 668;  // Was 295, nu onderaan: 1080 - 115
 const PLAYER_3_X = 1340;
-const PLAYER_3_Y = 668;  // Was 295, nu onderaan: 1080 - 115
-const POT_X = 1660;
+const ANSWER_BAR_LEFT_1 = 170;    // X-positie linker kolom (speler 1)
+const ANSWER_BAR_LEFT_2 = 710;   // X-positie midden kolom (speler 2)
+const ANSWER_BAR_LEFT_3 = 1254;  // X-positie rechter kolom (speler 3)
+
+// 2-SPELER MODUS (smaller, gecentreerd) - alleen posities 2 & 3
+const PLAYER_2_X_2P = 575;   // Midden positie in 2-speler modus
+const PLAYER_3_X_2P = 1115;  // Rechts positie in 2-speler modus
+const ANSWER_BAR_LEFT_2_2P = 585;   // X-positie midden kolom in 2-speler
+const ANSWER_BAR_LEFT_3_2P = 1159;  // X-positie rechter kolom in 2-speler
+const POT_X_2P = 1400;       // POT positie in 2-speler modus (meer naar links)
+
+// Gedeelde posities
+const PLAYER_Y = 668;  // Was 295, nu onderaan: 1080 - 115
+const POT_X = 1660;      // POT positie in 3-speler modus
 const POT_Y = 668;       // Was 295, nu onderaan: 1080 - 115
 const FONT_SIZE = 35;
 const FONT_FAMILY = 'Arial Black, sans-serif';
@@ -23,9 +35,6 @@ const FONT_FAMILY = 'Arial Black, sans-serif';
 // Answer bars positie
 const ANSWER_BARS_START_Y = 720; // Pas deze waarde aan om de bars te verschuiven
 const ANSWER_BAR_HEIGHT = 85;    // Verticale afstand tussen bars
-const ANSWER_BAR_LEFT_1 = 170;    // X-positie linker kolom (speler 1)
-const ANSWER_BAR_LEFT_2 = 710;   // X-positie midden kolom (speler 2)
-const ANSWER_BAR_LEFT_3 = 1254;  // X-positie rechter kolom (speler 3)
 const ANSWER_BAR_WIDTH = 500;    // Breedte van de bars
 const ANSWER_BAR_BAR_HEIGHT = 80; // Hoogte van de bars
 // ============================================================
@@ -87,8 +96,7 @@ export function FillOutput() {
   // Een speler is actief als: is_active=true EN balance > 0
   const activePlayers = players.filter(p => p.is_active && p.balance > 0);
   const activeCount = activePlayers.length;
-  
-  console.log('FillOutput - Active players:', activeCount, activePlayers.map(p => `${p.name} (€${p.balance})`));
+  const roundNumber = gameState?.round_number || 1;
   
   let backgroundImage = '/graphics_info/BACK-03.png'; // Default: 3 spelers
   
@@ -100,31 +108,47 @@ export function FillOutput() {
   // Voor toekomstig gebruik: BACK-SELECT.png voor "kijkers thuis" mode
   
   // Map players naar graphics posities
-  const roundNumber = gameState?.round_number || 1;
   
-  const playerPositions = activePlayers.map((player, index) => {
-    let graphicsPosition: number;
-    
-    if (roundNumber >= 5 && activePlayers.length === 2) {
-      // Rondes 5-7 met 2 spelers: ALTIJD op posities 2 & 3 (midden & rechts)
-      graphicsPosition = index === 0 ? 2 : 3;
-    } else {
-      // Rondes 1-4: gebruik originele player ID
-      let idNum = 0;
-      if (player.id.includes('_')) {
-        idNum = parseInt(player.id.split('_')[1]);
-      } else {
-        idNum = parseInt(player.id) - 1;
-      }
-      graphicsPosition = idNum + 1; // 0->1, 1->2, 2->3
+  // Functie om originele player index te krijgen
+  const getOriginalPlayerIndex = (player: any): number => {
+    if (player.id.includes('_')) {
+      return parseInt(player.id.split('_')[1]);
     }
+    return parseInt(player.id) - 1;
+  };
+  
+  // Check of we in 2-speler modus moeten zijn
+  const is2PlayerMode = roundNumber >= 5 && activeCount === 2;
+  
+  let playerPositions: Array<{player: any, originalIndex: number, isActive: boolean}> = [];
+  
+  if (is2PlayerMode) {
+    // Rondes 5-7 met 2 spelers:
+    // Sorteer actieve spelers op hun ORIGINELE positie (0, 1, 2)
+    // Dan: eerste actieve → grafische positie 2, tweede actieve → grafische positie 3
     
-    return {
+    const sortedActivePlayers = [...activePlayers].sort((a, b) => 
+      getOriginalPlayerIndex(a) - getOriginalPlayerIndex(b)
+    );
+    
+    playerPositions = sortedActivePlayers.map((player, index) => ({
       player,
-      originalIndex: graphicsPosition,
+      originalIndex: index === 0 ? 2 : 3, // Eerste → pos 2, Tweede → pos 3
       isActive: true
-    };
-  });
+    }));
+  } else {
+    // Rondes 1-4 of 3 spelers: gebruik originele player ID
+    playerPositions = activePlayers.map(player => {
+      const idNum = getOriginalPlayerIndex(player);
+      const graphicsPosition = idNum + 1; // 0->1, 1->2, 2->3
+      
+      return {
+        player,
+        originalIndex: graphicsPosition,
+        isActive: true
+      };
+    });
+  }
   
   return (
     <div className="graphics-container">
@@ -154,32 +178,45 @@ export function FillOutput() {
       />
       {/* Bedragen - alleen actieve spelers op hun oorspronkelijke posities */}
       {playerPositions.map(({ player, originalIndex }) => {
-        // Gebruik de oorspronkelijke player positie (1, 2, of 3)
-        let x, y;
-        if (originalIndex === 1) {
-          x = PLAYER_1_X;
-          y = PLAYER_1_Y;
-        } else if (originalIndex === 2) {
-          x = PLAYER_2_X;
-          y = PLAYER_2_Y;
+        // Gebruik de juiste X-positie afhankelijk van 2-speler of 3-speler modus
+        let x;
+        const y = PLAYER_Y;
+        
+        if (is2PlayerMode) {
+          // 2-speler modus: gebruik 2P posities
+          if (originalIndex === 2) {
+            x = PLAYER_2_X_2P;
+          } else if (originalIndex === 3) {
+            x = PLAYER_3_X_2P;
+          } else {
+            x = PLAYER_2_X_2P; // fallback
+          }
         } else {
-          x = PLAYER_3_X;
-          y = PLAYER_3_Y;
+          // 3-speler modus: gebruik normale posities
+          if (originalIndex === 1) {
+            x = PLAYER_1_X;
+          } else if (originalIndex === 2) {
+            x = PLAYER_2_X;
+          } else {
+            x = PLAYER_3_X;
+          }
         }
         
+        const divStyle = {
+          position: 'absolute' as const,
+          top: `${y}px`,
+          left: `${x}px`,
+          transform: 'translateX(-50%)',
+          fontSize: `${FONT_SIZE}px`,
+          letterSpacing: '1px',
+          color: '#FFFFFF',
+          fontWeight: 900,
+          textShadow: '2px 2px 6px rgba(0,0,0,0.95)',
+          fontFamily: FONT_FAMILY
+        };
+        
         return (
-          <div key={`balance-${player.id}`} style={{
-            position: 'absolute',
-            top: `${y}px`,
-            left: `${x}px`,
-            transform: 'translateX(-50%)',
-            fontSize: `${FONT_SIZE}px`,
-            letterSpacing: '1px',
-            color: '#FFFFFF',
-            fontWeight: 900,
-            textShadow: '2px 2px 6px rgba(0,0,0,0.95)',
-            fontFamily: FONT_FAMILY
-          }}>
+          <div key={`balance-${player.id}`} style={divStyle}>
             {player.balance}
           </div>
         );
@@ -188,7 +225,7 @@ export function FillOutput() {
       {/* Answer bars - toon tekst, alleen kleuren bij reveal */}
       {playerPositions.map(({ player, originalIndex }) => 
         Array.from({ length: questionsCount }, (_, qIndex) => {
-          const answer = player.answers.find(a => a.question_number === qIndex + 1);
+          const answer = player.answers.find((a: any) => a.question_number === qIndex + 1);
           const questionNum = qIndex + 1;
           const isRevealed = gameState?.current_round?.revealed_questions.includes(questionNum) || false;
           let barColor = 'transparent';
@@ -202,14 +239,26 @@ export function FillOutput() {
             }
           }
           
-          // Gebruik de oorspronkelijke kolom positie
+          // Gebruik de juiste kolom positie afhankelijk van 2-speler of 3-speler modus
           let leftPos;
-          if (originalIndex === 1) {
-            leftPos = ANSWER_BAR_LEFT_1; // Links
-          } else if (originalIndex === 2) {
-            leftPos = ANSWER_BAR_LEFT_2; // Midden
+          if (is2PlayerMode) {
+            // 2-speler modus: gebruik 2P posities
+            if (originalIndex === 2) {
+              leftPos = ANSWER_BAR_LEFT_2_2P; // Midden in 2P
+            } else if (originalIndex === 3) {
+              leftPos = ANSWER_BAR_LEFT_3_2P; // Rechts in 2P
+            } else {
+              leftPos = ANSWER_BAR_LEFT_2_2P; // fallback
+            }
           } else {
-            leftPos = ANSWER_BAR_LEFT_3; // Rechts
+            // 3-speler modus: gebruik normale posities
+            if (originalIndex === 1) {
+              leftPos = ANSWER_BAR_LEFT_1; // Links
+            } else if (originalIndex === 2) {
+              leftPos = ANSWER_BAR_LEFT_2; // Midden
+            } else {
+              leftPos = ANSWER_BAR_LEFT_3; // Rechts
+            }
           }
           
           return (
@@ -249,7 +298,7 @@ export function FillOutput() {
       <div style={{
         position: 'absolute',
         top: `${POT_Y}px`,
-        left: `${POT_X}px`,
+        left: `${is2PlayerMode ? POT_X_2P : POT_X}px`,
         transform: 'translateX(-50%)',
         fontSize: `${FONT_SIZE}px`,
         letterSpacing: '1px',

@@ -43,6 +43,7 @@ pub fn run() {
             commands::advance_phase,
             commands::complete_round,
             commands::start_next_round,
+            commands::set_round_number,
             commands::reset_game,
             commands::toggle_player_active,
             commands::reveal_question,

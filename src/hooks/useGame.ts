@@ -258,6 +258,22 @@ export function useGame() {
     }
   };
 
+  const setRoundNumber = async (roundNum: number) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const game = await invoke<GameState>('set_round_number', { roundNum });
+      setGameState(game);
+      return game;
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      setError(errorMsg);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     gameState,
     loading,
@@ -278,5 +294,6 @@ export function useGame() {
     togglePlayerActive,
     revealQuestion,
     toggleVideoMode,
+    setRoundNumber,
   };
 }

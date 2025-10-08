@@ -1,6 +1,6 @@
 {
   "name": "met-het-mes-op-tafel",
-  "version": "1.0.0",
+  "version": "1.2.1",
   "description": "Nederlandse kennisquiz met poker-elementen",
   "type": "module",
   "scripts": {
