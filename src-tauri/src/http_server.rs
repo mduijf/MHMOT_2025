@@ -101,7 +101,6 @@ fn get_assets_dir() -> PathBuf {
     }
     
     // In production: try to find bundled resources
-    // The resources are bundled in the app's resource directory
     if let Ok(exe_path) = std::env::current_exe() {
         if let Some(exe_dir) = exe_path.parent() {
             // Tauri dev build: check _up_/dist
@@ -111,44 +110,46 @@ fn get_assets_dir() -> PathBuf {
                 return tauri_dev;
             }
             
-            // macOS App Bundle: Check multiple possible locations
-            // Pattern 1: Contents/MacOS/../Resources/dist
-            let macos_resources_1 = exe_dir.join("../Resources/dist");
-            if macos_resources_1.exists() {
-                println!("   📁 Serving assets from: {:?} (macOS bundle)", macos_resources_1);
-                return macos_resources_1;
+            // macOS App Bundle: Contents/Resources/dist (Tauri bundles resources here)
+            let macos_resources = exe_dir.join("../Resources/dist");
+            if macos_resources.exists() {
+                let canonical = std::fs::canonicalize(&macos_resources).unwrap_or(macos_resources.clone());
+                println!("   📁 Serving assets from: {:?} (macOS bundle)", canonical);
+                return canonical;
             }
             
-            // Pattern 2: Contents/MacOS/../../Contents/Resources/dist (for nested bundles)
-            let macos_resources_2 = exe_dir.join("../../Contents/Resources/dist");
-            if macos_resources_2.exists() {
-                println!("   📁 Serving assets from: {:?} (macOS bundle alt)", macos_resources_2);
-                return macos_resources_2;
-            }
-            
-            // Pattern 3: Check if dist is directly in Resources (without dist subfolder)
+            // If dist subfolder doesn't exist, check if files are directly in Resources
             let macos_resources_root = exe_dir.join("../Resources");
             if macos_resources_root.join("index.html").exists() {
-                println!("   📁 Serving assets from: {:?} (macOS Resources root)", macos_resources_root);
-                return macos_resources_root;
+                let canonical = std::fs::canonicalize(&macos_resources_root).unwrap_or(macos_resources_root.clone());
+                println!("   📁 Serving assets from: {:?} (macOS Resources)", canonical);
+                return canonical;
             }
             
-            // Try relative to exe
+            // Windows/Linux: try relative to exe
             let local_dist = exe_dir.join("dist");
             if local_dist.exists() {
                 println!("   📁 Serving assets from: {:?} (local)", local_dist);
                 return local_dist;
             }
             
-            // Debug: print the exe path and what we tried
-            println!("   🔍 Executable path: {:?}", exe_path);
-            println!("   🔍 Tried: {:?}", macos_resources_1);
-            println!("   🔍 Tried: {:?}", macos_resources_2);
-            println!("   🔍 Tried: {:?}", macos_resources_root);
+            // Final debug output
+            println!("   ⚠️  Assets not found!");
+            println!("   🔍 Executable: {:?}", exe_path);
+            println!("   🔍 Checked: {:?}", macos_resources);
+            println!("   🔍 Checked: {:?}", macos_resources_root);
+            
+            // List what's actually in Resources
+            if let Ok(entries) = std::fs::read_dir(exe_dir.join("../Resources")) {
+                println!("   📂 Contents of Resources:");
+                for entry in entries.flatten() {
+                    println!("      - {:?}", entry.file_name());
+                }
+            }
         }
     }
     
-    println!("   ⚠️  Assets directory not found, using fallback: ../dist");
+    println!("   ⚠️  Using fallback: ../dist");
     dev_path
 }
 
