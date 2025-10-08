@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { GameState } from '../types/game';
+import { getServerUrl } from '../components/ServerConfig';
 import '../styles/key-output.css';
 
 export function KeyOutput() {
@@ -15,8 +16,9 @@ export function KeyOutput() {
           const state = await invoke<GameState>('get_game_state');
           setGameState(state);
         } else {
-          // Fallback: fetch via HTTP API (voor OBS Browser Source)
-          const response = await fetch('http://localhost:3001/api/gamestate');
+          // Gebruik geconfigureerde server URL (voor OBS Browser Source / externe displays)
+          const serverUrl = getServerUrl();
+          const response = await fetch(`${serverUrl}/api/gamestate`);
           if (response.ok) {
             const state = await response.json();
             setGameState(state);

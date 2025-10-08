@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { GameState } from '../types/game';
 import { AnswerInput } from '../components/AnswerInput';
 import { VideoDisplay } from '../components/VideoDisplay';
+import { ServerConfig, getServerUrl } from '../components/ServerConfig';
 
 interface PlayerOutputProps {
   playerNumber: 1 | 2 | 3;
@@ -18,12 +19,9 @@ export function PlayerOutput({ playerNumber }: PlayerOutputProps) {
         const state = await invoke<GameState>('get_game_state');
         setGameState(state);
       } else {
-        // Fallback voor browser/OBS
-        // Gebruik het IP-adres van de host als we niet op localhost zitten
-        const apiHost = window.location.hostname === 'localhost' 
-          ? 'localhost' 
-          : window.location.hostname;
-        const response = await fetch(`http://${apiHost}:3001/api/gamestate`);
+        // Gebruik geconfigureerde server URL of fallback
+        const serverUrl = getServerUrl();
+        const response = await fetch(`${serverUrl}/api/gamestate`);
         const data = await response.json();
         setGameState(data);
       }
@@ -38,11 +36,9 @@ export function PlayerOutput({ playerNumber }: PlayerOutputProps) {
         await invoke('update_answer', { playerId, questionNumber, imageData });
         fetchState();
       } else {
-        // Gebruik HTTP API voor browser context
-        const apiHost = window.location.hostname === 'localhost' 
-          ? 'localhost' 
-          : window.location.hostname;
-        const response = await fetch(`http://${apiHost}:3001/api/update_answer`, {
+        // Gebruik geconfigureerde server URL
+        const serverUrl = getServerUrl();
+        const response = await fetch(`${serverUrl}/api/update_answer`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -91,15 +87,23 @@ export function PlayerOutput({ playerNumber }: PlayerOutputProps) {
   
   // Als video mode actief is, toon de video display
   if (gameState.video_mode_active) {
-    return <VideoDisplay deviceId={gameState.video_device_id || undefined} />;
+    return (
+      <>
+        <ServerConfig />
+        <VideoDisplay deviceId={gameState.video_device_id || undefined} />
+      </>
+    );
   }
   
   return (
-    <AnswerInput
-      gameState={gameState}
-      playerId={playerId}
-      onUpdateAnswer={handleUpdateAnswer}
-    />
+    <>
+      <ServerConfig />
+      <AnswerInput
+        gameState={gameState}
+        playerId={playerId}
+        onUpdateAnswer={handleUpdateAnswer}
+      />
+    </>
   );
 }
 
